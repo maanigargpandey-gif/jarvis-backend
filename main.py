@@ -52,7 +52,7 @@ async def jarvis_brain(request_data: JarvisRequest):
                     "https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
                     json={
-                        "model": "cognitivecomputations/dolphin-mixtral-8x7b",
+                        "model": "meta-llama/llama-3-8b-instruct", 
                         "messages": [{"role": "user", "content": f"ACTIVATE AUTOPILOT: Generate full Flutter Dart code for Jarvis God-Mode. Command: {user_prompt}"}]
                     },
                     timeout=60.0
