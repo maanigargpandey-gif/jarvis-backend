@@ -1,18 +1,20 @@
 import os
 import subprocess
-import logging
-
-logger = logging.getLogger(__name__)
+from modules.config import Config
 
 async def build_flutter_app(idea: str, api_keys: dict, platform: str = "android"):
     from modules.ai_brain import execute_llm_logic
     
     system_prompt = f"""Write the COMPLETE, single-file Flutter 'main.dart' code for this app idea: {idea}. 
-    Requirements: Use a dark/cyberpunk theme with neon accents. DO NOT output any markdown, explanations, or text. ONLY output the raw Dart code."""
+    Requirements: 
+    1. Dark Cyberpunk theme with neon accents.
+    2. Secure Login Screen at startup.
+    3. Role-Based Access UI: Distinct 'Creator/God-Mode' dashboard (with AI Chat, Media Tools, Document Forge) and a highly restricted 'Standard/Guest Mode' chat view.
+    4. Single Creator Constraint: Include logic checking if the Creator role is active elsewhere, forcing secondary sessions into Guest Mode.
+    DO NOT output any markdown, explanations, or text. ONLY output the raw Dart code."""
     
     brain_response = await execute_llm_logic(system_prompt, "Groq", api_keys)
     
-    # <--- असली बदलाव यहाँ है: अब ये असली एरर मैसेज दिखाएगा --->
     if brain_response.get("status") == "error":
         return {"status": "error", "message": f"AI Brain Error: {brain_response.get('message')}"}
         
@@ -24,8 +26,6 @@ async def build_flutter_app(idea: str, api_keys: dict, platform: str = "android"
             f.write(flutter_code)
             
         cmd = ["flutter", "build", "ipa" if platform == "ios" else "apk", "--release"]
-        
-        logger.info(f"Running build command: {cmd}")
         build_process = subprocess.run(cmd, cwd="frontend", capture_output=True, text=True)
         
         if build_process.returncode == 0:
@@ -41,3 +41,4 @@ async def build_flutter_app(idea: str, api_keys: dict, platform: str = "android"
             
     except Exception as e:
         return {"status": "error", "message": str(e)}
+        
