@@ -12,10 +12,11 @@ async def build_flutter_app(idea: str, api_keys: dict, platform: str = "android"
     
     brain_response = await execute_llm_logic(system_prompt, "Groq", api_keys)
     
+    # <--- असली बदलाव यहाँ है: अब ये असली एरर मैसेज दिखाएगा --->
     if brain_response.get("status") == "error":
-        return {"status": "error", "message": "Failed to generate app code"}
+        return {"status": "error", "message": f"AI Brain Error: {brain_response.get('message')}"}
         
-    flutter_code = brain_response["output"]
+    flutter_code = brain_response.get("output", "")
     
     try:
         os.makedirs("frontend/lib", exist_ok=True)
@@ -32,13 +33,11 @@ async def build_flutter_app(idea: str, api_keys: dict, platform: str = "android"
                 "status": "success",
                 "message": "APK built successfully!",
                 "delivery": {
-                    "download_url": "/download-apk/app-release.apk",
-                    "file_path": "frontend/build/app/outputs/flutter-apk/app-release.apk"
+                    "download_url": "/download-apk/app-release.apk"
                 }
             }
         else:
-            return {"status": "error", "message": f"Build failed: {build_process.stderr}"}
+            return {"status": "error", "message": f"Flutter Build failed: {build_process.stderr}"}
             
     except Exception as e:
         return {"status": "error", "message": str(e)}
-        
