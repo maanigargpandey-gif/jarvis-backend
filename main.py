@@ -1,8 +1,13 @@
 import os
+import json
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-# 🔌 तुम्हारे सातों हथियार (Modules) यहाँ मेन बोर्ड से जुड़ रहे हैं
+# सभी मॉड्यूल्स का इम्पोर्ट
+from modules.config import Config
 from modules.ai_brain import execute_god_brain
 from modules.app_factory import build_flutter_app
 from modules.media_studio import generate_media
@@ -11,72 +16,88 @@ from modules.social_vault import manage_social_task
 from modules.security_core import run_security_protocol
 from modules.system_memory import manage_memory
 from modules.identity_core import identity
+from modules.self_evolution import health_check
+
 app = FastAPI(title="Jarvis God-Mode: The Ultimate OS")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# APK डायरेक्टरी सेटअप
+if not os.path.exists(Config.APK_DIR): 
+    os.makedirs(Config.APK_DIR, exist_ok=True)
+app.mount("/builds", StaticFiles(directory=Config.APK_DIR), name="builds")
+
+def check_permission(role: str, action: str) -> bool:
+    if role == "owner": 
+        return True
+    try:
+        if os.path.exists("data/permissions.json"):
+            with open("data/permissions.json", "r") as f:
+                perms = json.load(f)
+                return action in perms.get(role, [])
+    except Exception:
+        pass
+    return False
+
 @app.on_event("startup")
 async def startup_event():
+    health_check()
     owner = identity.get_owner()
-    if not owner:
-        print("SYSTEM: [ALERT] No owner bound. Initiate onboarding.")
-    else:
-        print(f"SYSTEM: [VERIFIED] Welcome back, {owner['name']}.")
-# ----------------------------
-
-# 🧠 THE VAULT (API Keys)
-system_vault = {
-# 🧠 THE VAULT (API Keys)
-system_vault = {
-    "api_keys": {
-        "Groq": os.getenv("Jarvis_Logic", ""),
-        "HuggingFace_Uncensored": os.getenv("HF_KEY", "free_mode_active")
-    },
-    "active_provider": "Groq"
-}
+    print(f"SYSTEM: [VERIFIED] Welcome back, {owner['name'] if owner else 'Guest'}.")
 
 class Command(BaseModel):
     action: str
     role: str
     details: dict
 
+@app.get("/download-apk/{filename}")
+async def download_apk(filename: str):
+    file_path = f"{Config.APK_DIR}{filename}"
+    if os.path.exists(file_path): 
+        return FileResponse(file_path, media_type='application/vnd.android.package-archive', filename=filename)
+    raise HTTPException(status_code=404, detail="APK file not ready yet.")
+
 @app.post("/ultimate-jarvis")
 async def ultimate_jarvis(cmd: Command):
-    # 🚫 SECURITY GATE: गेस्ट को सिर्फ बेसिक चैट और अपनी 24 घंटे वाली मेमोरी की परमिशन है
-    if cmd.role == "guest" and cmd.action not in ["god_prompt", "save_memory", "retrieve_memory"]:
-        raise HTTPException(status_code=403, detail="ACCESS DENIED: Guest mode restricted.")
+    # डायनामिक सिक्योरिटी गेट
+    if not check_permission(cmd.role, cmd.action):
+        raise HTTPException(status_code=403, detail="ACCESS DENIED: Role unauthorized for this action.")
 
-    # 🛡️ 1. SECURITY CORE (लॉगिन & डिवाइस स्कैन)
-    if cmd.action in ["login", "system_scan"]:
+    api_keys = {"Groq": Config.GROQ_API_KEY, "HuggingFace_Uncensored": Config.HF_API_KEY}
+
+    # 1. Security Core
+    if cmd.action in ["login", "system_scan"]: 
         return await run_security_protocol(cmd.action, cmd.role, cmd.details)
-
-    # 🧠 2. SYSTEM MEMORY (अनलिमिटेड vs 24 घंटे)
-    if cmd.action in ["save_memory", "retrieve_memory"]:
+        
+    # 2. System Memory
+    if cmd.action in ["save_memory", "retrieve_memory"]: 
         mem_action = "save" if cmd.action == "save_memory" else "retrieve"
-        data = cmd.details.get("data")
-        return await manage_memory(mem_action, cmd.role, data)
-
-    # 🤖 3. AI BRAIN (अनसेंसर्ड नोड)
-    if cmd.action == "god_prompt":
-        prompt = cmd.details.get("task")
-        return await execute_god_brain(prompt, system_vault["active_provider"], system_vault["api_keys"])
-
-    # 🏭 4. APP FACTORY (APK और Flutter कोड)
-    if cmd.action == "build_apk":
-        app_idea = cmd.details.get("idea")
-        return await build_flutter_app(app_idea, system_vault["api_keys"])
-
-    # 🎬 5. MEDIA STUDIO (फेशियल कंसिस्टेंसी & रील्स)
-    if cmd.action in ["create_image", "create_reel"]:
-        media_type = "image" if cmd.action == "create_image" else "reel"
-        return await generate_media(media_type, cmd.details, system_vault["api_keys"])
-
-    # 📂 6. DOCUMENT FORGE (PDF & Forms)
-    if cmd.action == "generate_doc":
-        doc_type = cmd.details.get("type")
-        return await create_document(doc_type, cmd.details)
-
-    # 📱 7. SOCIAL VAULT (ऑटो-पोस्ट & पासवर्ड)
-    if cmd.action in ["auto_post", "recover_password"]:
-        platform = cmd.details.get("platform")
-        return await manage_social_task(cmd.action, platform, cmd.details, system_vault)
+        return await manage_memory(mem_action, cmd.role, cmd.details.get("data"))
+        
+    # 3. AI Brain
+    if cmd.action == "god_prompt": 
+        return await execute_god_brain(cmd.details.get("task"), "Groq", api_keys)
+        
+    # 4. App Factory
+    if cmd.action == "build_apk": 
+        return await build_flutter_app(cmd.details.get("idea"), api_keys, cmd.details.get("platform", "android"))
+        
+    # 5. Media Studio
+    if cmd.action in ["create_image", "create_reel"]: 
+        return await generate_media(cmd.action, cmd.details, api_keys)
+        
+    # 6. Document Forge
+    if cmd.action == "generate_doc": 
+        return await create_document(cmd.details.get("type"), cmd.details)
+        
+    # 7. Social Vault
+    if cmd.action in ["auto_post", "recover_password"]: 
+        return await manage_social_task(cmd.action, cmd.details.get("platform"), cmd.details, api_keys)
 
     return {"status": "error", "message": "Command not recognized by Jarvis OS."}
-    
