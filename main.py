@@ -1,24 +1,23 @@
 import os
 import traceback
 from fastapi import FastAPI
-from pydantic import BaseModel # 👈 यह वो जादू है जो डिब्बा वापस लाएगा
+from pydantic import BaseModel
 import httpx
 
 app = FastAPI(title="Jarvis God-Mode OS")
 
-# 🧠 ऑटो-पायलट: रेंडर से चाबियां खींचना
+# 🧠 ऑटो-पायलट: तुम्हारे रेंडर के स्क्रीनशॉट वाले बिल्कुल सटीक नाम
 GROQ_API_KEY = os.getenv("Jarvis_Logic", "")
-HUGGINGFACE_API_KEY = os.getenv("Jarvis_Vision", "")
+HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "")
 OPENROUTER_API_KEY = os.getenv("Jarvis_Unbound", "")
-GITHUB_API_KEY = os.getenv("Jarvis_APK_Builder", "")
+GITHUB_API_KEY = os.getenv("GITHUB_PAT", "")
 
-# 🎯 Swagger UI को डिब्बा दिखाने का निर्देश
 class JarvisRequest(BaseModel):
     message: str
     power_level: str = "extreme"
 
 @app.post("/jarvis-god-mode")
-async def jarvis_brain(request_data: JarvisRequest): # 👈 डिब्बा यहाँ से कनेक्ट होगा
+async def jarvis_brain(request_data: JarvisRequest):
     try:
         user_prompt = request_data.message.lower()
         power_level = request_data.power_level
@@ -30,10 +29,15 @@ async def jarvis_brain(request_data: JarvisRequest): # 👈 डिब्बा �
             "ui_action": "AUTO_PILOT_ENGAGED"
         }
 
+        # ⚡ चेक करना कि कौन-कौन सी चाबियां एक्टिव हैं
         if OPENROUTER_API_KEY:
             response_payload["active_systems"].append("Jarvis_Unbound (OpenRouter Active)")
         if GROQ_API_KEY:
             response_payload["active_systems"].append("Jarvis_Logic (Groq Active)")
+        if HUGGINGFACE_API_KEY:
+            response_payload["active_systems"].append("HUGGINGFACE_API_KEY (Vision Active)")
+        if GITHUB_API_KEY:
+            response_payload["active_systems"].append("GITHUB_PAT (GitHub Active)")
 
         if not OPENROUTER_API_KEY and not GROQ_API_KEY:
             return {
