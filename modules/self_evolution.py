@@ -1,13 +1,8 @@
 import os
 import sys
 import subprocess
-import logging
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
 
 def health_check():
-    logger.info("SYSTEM DIAGNOSTIC STARTING...")
     report = {
         "status": "success",
         "message": "Jarvis Backend Core Diagnostic Complete.",
@@ -22,7 +17,7 @@ def health_check():
             os.makedirs(d, exist_ok=True)
             report["fixed_issues"].append(f"Created missing directory: {d}")
             
-    # 2. लाइब्रेरी चेक
+    # 2. लाइब्रेरी डिपेंडेंसी चेक
     required_libs = ["fastapi", "uvicorn", "httpx", "beautifulsoup4", "python-dotenv", "pydantic"]
     for lib in required_libs:
         try:
@@ -36,8 +31,7 @@ def health_check():
         with open("data/permissions.json", "w") as f:
             f.write('{"guest": ["god_prompt", "save_memory", "retrieve_memory"], "owner": ["all"]}')
         report["fixed_issues"].append("Generated missing permissions.json file")
-            
-    # अगर कोई एरर नहीं मिला
+        
     if not report["fixed_issues"]:
         report["fixed_issues"].append("No backend errors found. Jarvis core is 100% healthy.")
         
