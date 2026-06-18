@@ -2,7 +2,7 @@ import os
 import subprocess
 from modules.ai_brain import execute_god_brain
 
-async def build_flutter_app(idea: str, api_keys: dict):
+async def build_flutter_app(idea: str, api_keys: dict, platform: str = "android"):
     # 1. AI को प्रॉम्प्ट देना (आपका वाला लॉजिक सेम है)
     system_prompt = f"""
     Write the COMPLETE, single-file Flutter 'main.dart' code for this app idea: {idea}.
@@ -30,12 +30,19 @@ async def build_flutter_app(idea: str, api_keys: dict):
             
         # 3. APK बिल्ड करना (यह आपके सिस्टम पर 'flutter' कमांड चलाएगा)
         # नोट: यह प्रोसेस में थोड़ा समय लेगा
+                # 3. APK या IPA बिल्ड करना (प्लेटफॉर्म के हिसाब से)
+        if platform == "ios":
+            cmd = ["flutter", "build", "ipa", "--release"]
+        else:
+            cmd = ["flutter", "build", "apk", "--release"]
+            
         build_process = subprocess.run(
-            ["flutter", "build", "apk", "--release"], 
+            cmd, 
             cwd="frontend", 
             capture_output=True, 
             text=True
         )
+        
 
         if build_process.returncode == 0:
             return {
