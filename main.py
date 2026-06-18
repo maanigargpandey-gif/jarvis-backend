@@ -3,48 +3,56 @@ from fastapi import FastAPI
 import httpx
 from pydantic import BaseModel
 
-app = FastAPI(title="Jarvis God-Mode Robust OS")
+app = FastAPI(title="Jarvis Orchestrator OS")
+
+# 🧠 सर्विस रजिस्ट्री (इसे तू कभी भी ऑडिट करके बदल सकता है)
+service_registry = {
+    "Groq": {"url": "https://api.groq.com/openai/v1/chat/completions", "active": True},
+    "OpenRouter": {"url": "https://openrouter.ai/api/v1/chat/completions", "active": False},
+    "HuggingFace": {"url": "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct", "active": False}
+}
 
 system_state = {
-    "api_keys": {"Groq": os.getenv("Jarvis_Logic", "")},
-    "active_model": "llama3-70b-8192"
+    "api_keys": {"Groq": os.getenv("Jarvis_Logic", ""), "OpenRouter": os.getenv("Jarvis_Unbound", ""), "HuggingFace": os.getenv("HF_KEY", "")},
+    "active_provider": "Groq"
 }
 
 class Command(BaseModel):
-    action: str
+    action: str # "audit", "switch", "execute"
     details: dict
 
 @app.post("/god-mode")
 async def god_mode(cmd: Command):
-    # 1. चाबी अपडेट करना
-    if cmd.action == "update_key":
-        system_state["api_keys"][cmd.details["provider"]] = cmd.details["key"]
-        return {"status": "success", "message": f"{cmd.details['provider']} updated."}
+    global system_state
     
-    # 2. टास्क पूरा करना (बेहतर एरर हैंडलिंग के साथ)
-    if cmd.action == "execute_task":
+    # 1. ऑडिट: ये खुद चेक करेगा कौन सा सर्वर जिंदा है
+    if cmd.action == "audit":
+        report = {}
         async with httpx.AsyncClient() as client:
-            try:
-                response = await client.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {system_state['api_keys']['Groq']}"},
-                    json={
-                        "model": system_state['active_model'], 
-                        "messages": [{"role": "user", "content": cmd.details['task']}]
-                    },
-                    timeout=60.0
-                )
-                
-                resp_data = response.json()
-                
-                # यहाँ हमने चेक लगा दिया है: अगर 'choices' नहीं है, तो पूरा डेटा दिखाओ
-                if "choices" in resp_data:
-                    return {"status": "success", "output": resp_data['choices'][0]['message']['content']}
-                else:
-                    return {"status": "error", "raw_response": resp_data} # क्या गड़बड़ है, वो दिखाएगा
+            for name, config in service_registry.items():
+                try:
+                    # हल्का टेस्ट चेक (ping)
+                    resp = await client.get(config["url"].split("/v1")[0], timeout=5.0)
+                    report[name] = "Available" if resp.status_code < 400 else "Down/Restricted"
+                except:
+                    report[name] = "Failed to reach"
+        return {"status": "Audit Complete", "report": report, "current_active": system_state["active_provider"]}
 
-            except Exception as e:
-                return {"status": "error", "message": str(e)}
+    # 2. स्विच: तू बोलेगा "HuggingFace लगाओ", ये लगा देगा
+    if cmd.action == "switch":
+        provider = cmd.details["provider"]
+        if provider in service_registry:
+            system_state["active_provider"] = provider
+            return {"status": "success", "message": f"Switched to {provider}"}
+        return {"status": "error", "message": "Provider not found"}
 
-    return {"status": "error", "message": "Unknown command."}
-
+    # 3. एग्जीक्यूट: ये ऑटोमैटिकली एक्टिव प्रोवाइडर यूज़ करेगा
+    if cmd.action == "execute":
+        provider = system_state["active_provider"]
+        key = system_state["api_keys"].get(provider)
+        url = service_registry[provider]["url"]
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers={"Authorization": f"Bearer {key}"}, json={"model": "llama3-70b-8192", "messages": [{"role": "user", "content": cmd.details['task']}]}, timeout=60.0)
+            return {"status": "success", "provider": provider, "output": response.json()}
+            
