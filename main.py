@@ -10,7 +10,7 @@ from modules.document_forge import create_document
 from modules.social_vault import manage_social_task
 from modules.security_core import run_security_protocol
 from modules.system_memory import manage_memory
-
+from modules.identity_core import identity
 app = FastAPI(title="Jarvis God-Mode: The Ultimate OS")
 
 # 🧠 THE VAULT (API Keys)
