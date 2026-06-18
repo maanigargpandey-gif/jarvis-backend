@@ -6,11 +6,8 @@ import httpx
 
 app = FastAPI(title="Jarvis God-Mode OS")
 
-# 🧠 ऑटो-पायलट: तुम्हारे रेंडर के स्क्रीनशॉट वाले बिल्कुल सटीक नाम
-GROQ_API_KEY = os.getenv("Jarvis_Logic", "")
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "")
-OPENROUTER_API_KEY = os.getenv("Jarvis_Unbound", "")
-GITHUB_API_KEY = os.getenv("GITHUB_PAT", "")
+# 🧠 ऑटो-पायलट: रेंडर तिजोरी से Groq की चाबी उठाना (100% Free)
+GROQ_API_KEY = os.getenv("Jarvis_Logic", "") 
 
 class JarvisRequest(BaseModel):
     message: str
@@ -20,58 +17,24 @@ class JarvisRequest(BaseModel):
 async def jarvis_brain(request_data: JarvisRequest):
     try:
         user_prompt = request_data.message.lower()
-        power_level = request_data.power_level
-
-        response_payload = {
-            "status": "success",
-            "active_systems": [],
-            "output": "",
-            "ui_action": "AUTO_PILOT_ENGAGED"
-        }
-
-        # ⚡ चेक करना कि कौन-कौन सी चाबियां एक्टिव हैं
-        if OPENROUTER_API_KEY:
-            response_payload["active_systems"].append("Jarvis_Unbound (OpenRouter Active)")
-        if GROQ_API_KEY:
-            response_payload["active_systems"].append("Jarvis_Logic (Groq Active)")
-        if HUGGINGFACE_API_KEY:
-            response_payload["active_systems"].append("HUGGINGFACE_API_KEY (Vision Active)")
-        if GITHUB_API_KEY:
-            response_payload["active_systems"].append("GITHUB_PAT (GitHub Active)")
-
-        if not OPENROUTER_API_KEY and not GROQ_API_KEY:
-            return {
-                "status": "error", 
-                "output": "CRITICAL: रेंडर में 'Jarvis_Unbound' या 'Jarvis_Logic' नाम की कोई चाबी नहीं मिली!"
-            }
-
-        # 🔴 EXTREME MODE - ऑटोमेटिक OpenRouter को कॉल करना
-        if OPENROUTER_API_KEY:
-            async with httpx.AsyncClient() as client:
-                ai_response = await client.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-                    json={
-                        "model": "meta-llama/llama-3-8b-instruct", 
-                        "messages": [{"role": "user", "content": f"ACTIVATE AUTOPILOT: Generate full Flutter Dart code for Jarvis God-Mode. Command: {user_prompt}"}]
-                    },
-                    timeout=60.0
-                )
-                
-                if ai_response.status_code == 200:
-                    response_payload["output"] = ai_response.json()['choices'][0]['message']['content']
-                else:
-                    response_payload["output"] = f"API_REJECTED: OpenRouter Error -> {ai_response.text}"
-                    
-        return response_payload
+        
+        # 🚀 सीधा Groq (Free Tier) को कॉल करना
+        async with httpx.AsyncClient() as client:
+            groq_response = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+                json={
+                    "model": "llama3-70b-8192", # Groq का सबसे तगड़ा फ्री मॉडल
+                    "messages": [{"role": "user", "content": f"ACTIVATE AUTOPILOT: Generate full Flutter Dart code for Jarvis. Command: {user_prompt}"}]
+                },
+                timeout=60.0
+            )
+            
+            if groq_response.status_code == 200:
+                return {"status": "success", "output": groq_response.json()['choices'][0]['message']['content']}
+            else:
+                return {"status": "error", "output": f"GROQ_ERROR: {groq_response.text}"}
 
     except Exception as e:
-        error_msg = str(e)
-        stack_trace = traceback.format_exc() 
-        return {
-            "status": "SYSTEM_DIAGNOSTIC_REPORT",
-            "error_detail": error_msg,
-            "solution": "Traceback चेक करें",
-            "traceback": stack_trace
-        }
+        return {"status": "error", "detail": str(e)}
         
