@@ -31,3 +31,4 @@ def health_check():
             f.write('{"guest": ["god_prompt", "save_memory", "retrieve_memory"], "owner": ["all"]}')
             
     logger.info("SYSTEM DIAGNOSTIC COMPLETE: ALL SYSTEMS NOMINAL.")
+    
