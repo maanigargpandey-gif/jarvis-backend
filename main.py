@@ -12,7 +12,17 @@ from modules.security_core import run_security_protocol
 from modules.system_memory import manage_memory
 from modules.identity_core import identity
 app = FastAPI(title="Jarvis God-Mode: The Ultimate OS")
+@app.on_event("startup")
+async def startup_event():
+    owner = identity.get_owner()
+    if not owner:
+        print("SYSTEM: [ALERT] No owner bound. Initiate onboarding.")
+    else:
+        print(f"SYSTEM: [VERIFIED] Welcome back, {owner['name']}.")
+# ----------------------------
 
+# 🧠 THE VAULT (API Keys)
+system_vault = {
 # 🧠 THE VAULT (API Keys)
 system_vault = {
     "api_keys": {
