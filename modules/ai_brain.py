@@ -1,36 +1,35 @@
 import httpx
+from modules.config import Config
 from modules.app_factory import build_flutter_app
 from modules.security_core import run_security_protocol
 
 async def execute_llm_logic(prompt: str, provider: str, api_keys: dict):
-    if provider == "Groq":
-        try:
-            # 1. API Key Check (ये खुद बता देगा अगर रेंडर में की नहीं होगी)
-            if not api_keys.get('Groq'):
-                return {"status": "error", "message": "Groq API Key is MISSING in Render Environment!"}
+    # dynamic key retrieval
+    groq_key = api_keys.get("Groq") or Config.get_key("Groq")
+    if not groq_key:
+        return {"status": "error", "message": "Groq API Key is MISSING! Please install or check Render Env."}
 
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {api_keys.get('Groq')}"},
-                    json={
-                        "model": "llama3-70b-8192",
-                        "messages": [{"role": "user", "content": prompt}]
-                    },
-                    timeout=120.0  # <--- यहाँ टाइमआउट बढ़ाकर 120 सेकंड कर दिया है!
-                )
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {groq_key}"},
+                json={
+                    "model": "llama-3.1-70b-versatile",  # अपडेटेड नया स्टेबल मॉडल
+                    "messages": [{"role": "user", "content": prompt}]
+                },
+                timeout=120.0
+            )
+            
+            if response.status_code != 200:
+                return {"status": "error", "message": f"Groq API Error {response.status_code}: {response.text}"}
                 
-                # 2. अगर Groq की तरफ से कोई एरर आए (जैसे Rate Limit)
-                if response.status_code != 200:
-                    return {"status": "error", "message": f"Groq API Error {response.status_code}: {response.text}"}
-                    
-                data = response.json()
-                if "choices" in data:
-                    return {"status": "success", "output": data["choices"][0]["message"]["content"]}
-                return {"status": "error", "message": str(data)}
-        except Exception as e:
-            return {"status": "error", "message": f"Groq Connection Failed: {str(e)}"}
-    return {"status": "error", "message": "Unknown Provider"}
+            data = response.json()
+            if "choices" in data:
+                return {"status": "success", "output": data["choices"][0]["message"]["content"]}
+            return {"status": "error", "message": str(data)}
+    except Exception as e:
+        return {"status": "error", "message": f"Groq Connection Failed: {str(e)}"}
 
 async def execute_god_brain(prompt: str, provider: str, api_keys: dict):
     prompt_lower = prompt.lower()
