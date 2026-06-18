@@ -3,42 +3,45 @@ from fastapi import FastAPI
 import httpx
 from pydantic import BaseModel
 
-app = FastAPI(title="Jarvis God-Mode OS")
+app = FastAPI(title="Jarvis God-Mode Self-Evolving OS")
 
-# 🧠 स्मार्ट मेमोरी: यहाँ नयी चाबियाँ स्टोर होंगी
-temp_keys = {"Jarvis_Logic": None, "Jarvis_Unbound": None}
+# 🧠 गॉड-मेमोरी: सिस्टम का दिमाग और चाबियाँ अब यहीं रहेंगी
+system_state = {
+    "api_keys": {"Groq": os.getenv("Jarvis_Logic", ""), "OpenRouter": os.getenv("Jarvis_Unbound", "")},
+    "active_model": "llama3-70b-8192",
+    "features": ["Chat", "Error-Overlay"],
+    "directives": "You are Jarvis. Be efficient, fast, and strict."
+}
 
-class KeyUpdate(BaseModel):
-    service: str # 'Jarvis_Logic' या 'Jarvis_Unbound'
-    new_key: str
+class Command(BaseModel):
+    action: str  # "update_key", "change_model", "add_feature", "execute_task"
+    details: dict
 
-@app.post("/update-keys")
-async def update_keys(data: KeyUpdate):
-    temp_keys[data.service] = data.new_key
-    return {"status": "success", "message": f"{data.service} updated in memory!"}
-
-def get_key(service):
-    # पहले मेमोरी चेक करो, फिर रेंडर वाली तिजोरी
-    return temp_keys.get(service) or os.getenv(service)
-
-@app.post("/jarvis-god-mode")
-async def jarvis_brain(data: dict):
-    user_prompt = data.get("message", "")
+@app.post("/god-mode")
+async def god_mode(cmd: Command):
+    global system_state
     
-    # चाबियाँ यहाँ से उठाएगा
-    groq_key = get_key("Jarvis_Logic")
+    # 1. चाबी अपडेट करना (System Evolution)
+    if cmd.action == "update_key":
+        system_state["api_keys"][cmd.details["provider"]] = cmd.details["key"]
+        return {"status": "success", "message": f"{cmd.details['provider']} updated."}
     
-    if not groq_key:
-        return {"status": "error", "output": "चाबी गायब है! /update-keys पर नयी चाबी भेजो।"}
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {groq_key}"},
-            json={
-                "model": "llama3-70b-8192",
-                "messages": [{"role": "user", "content": f"Generate Flutter code: {user_prompt}"}]
-            }
-        )
-        return {"output": response.json()['choices'][0]['message']['content']}
+    # 2. टास्क पूरा करना (Execution)
+    if cmd.action == "execute_task":
+        prompt = f"DIRECTIVE: {system_state['directives']}. FEATURES ENABLED: {system_state['features']}. TASK: {cmd.details['task']}"
         
+        # Groq का इस्तेमाल (Default)
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {system_state['api_keys']['Groq']}"},
+                    json={"model": system_state['active_model'], "messages": [{"role": "user", "content": prompt}]},
+                    timeout=60.0
+                )
+                return {"status": "success", "output": response.json()['choices'][0]['message']['content']}
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+    return {"status": "error", "message": "Unknown command."}
+    
