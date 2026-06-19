@@ -1,63 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-// ==========================================
-// SYSTEM IGNITION
-// ==========================================
 void main() {
-  runApp(const JarvisGodModeApp());
+  runApp(const JarvisApp());
 }
 
-class JarvisGodModeApp extends StatelessWidget {
-  const JarvisGodModeApp({super.key});
+class JarvisApp extends StatelessWidget {
+  const JarvisApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'J.A.R.V.I.S God-Mode',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(useMaterial3: true).copyWith(
-        scaffoldBackgroundColor: const Color(0xFF090909), 
-        colorScheme: const ColorScheme.dark(
-          primary: Colors.cyanAccent,
-          secondary: Colors.purpleAccent,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0F0F0F),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0F0F0F),
+          elevation: 0,
         ),
       ),
-      home: const JarvisLoginScreen(), // ऐप अब सीधे डैशबोर्ड पर नहीं, लॉगिन पर खुलेगा
+      home: const LoginScreen(),
     );
   }
 }
 
-// ==========================================
-// THE SECURE LOGIN PORTAL
-// ==========================================
-class JarvisLoginScreen extends StatefulWidget {
-  const JarvisLoginScreen({super.key});
+// ---------------- LOGIN SCREEN (SECURE GATEWAY) ----------------
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<JarvisLoginScreen> createState() => _JarvisLoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _JarvisLoginScreenState extends State<JarvisLoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String errorMessage = '';
+  bool _isLoading = false;
 
-  void _attemptLogin() {
-    String user = _usernameController.text.trim();
-    String pass = _passwordController.text.trim();
-
-    // तुम्हारा सीक्रेट क्रिएटर लॉगिन
-    if (user == 'mani' && pass == 'God mode 123') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MasterGirgitDashboard()),
-      );
-    } else {
-      setState(() {
-        errorMessage = 'ACCESS DENIED: Unauthorized Identity.';
-      });
-    }
+  void _login() {
+    setState(() => _isLoading = true);
+    Future.delayed(const Duration(seconds: 1), () {
+      if (_usernameController.text == 'mani' && _passwordController.text == 'God mode 123') {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
+      } else {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Access Denied. Incorrect Identity.')));
+      }
+    });
   }
 
   @override
@@ -69,60 +59,34 @@ class _JarvisLoginScreenState extends State<JarvisLoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.security, size: 80, color: Colors.cyanAccent),
+              const Icon(Icons.security, size: 80, color: Colors.tealAccent),
               const SizedBox(height: 20),
-              const Text("J.A.R.V.I.S SECURE LOGIN", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 2, color: Colors.white)),
+              const Text('J.A.R.V.I.S SECURE LOGIN', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2)),
               const SizedBox(height: 40),
-              
-              // Username & Password
               TextField(
                 controller: _usernameController,
-                decoration: InputDecoration(labelText: "Identity (Username)", border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.person)),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(labelText: 'Identity (Username)', prefixIcon: Icon(Icons.person, color: Colors.white)),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: InputDecoration(labelText: "Passcode (Password)", border: const OutlineInputBorder(), prefixIcon: const Icon(Icons.lock)),
-              ),
-              
-              const SizedBox(height: 10),
-              Text(errorMessage, style: const TextStyle(color: Colors.redAccent)),
-              const SizedBox(height: 20),
-
-              // CREATOR LOGIN BUTTON
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.cyanAccent.withOpacity(0.2), side: const BorderSide(color: Colors.cyanAccent)),
-                  onPressed: _attemptLogin,
-                  child: const Text("INITIALIZE SYSTEM", style: TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(labelText: 'Passcode (Password)', prefixIcon: Icon(Icons.lock, color: Colors.white)),
               ),
               const SizedBox(height: 40),
-              
-              const Divider(color: Colors.white24),
-              const SizedBox(height: 20),
-              const Text("OWNER / GUEST ACCESS", style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 20),
-
-              // SOCIAL SIGNUP BUTTONS
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.g_mobiledata, color: Colors.white),
-                    label: const Text("Google", style: TextStyle(color: Colors.white)),
-                    onPressed: () { /* Logic for Google Signup */ },
-                  ),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.chat, color: Colors.greenAccent),
-                    label: const Text("WhatsApp", style: TextStyle(color: Colors.white)),
-                    onPressed: () { /* Logic for WhatsApp Signup */ },
-                  ),
-                ],
-              )
+              _isLoading 
+                  ? const CircularProgressIndicator(color: Colors.tealAccent)
+                  : ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0A3D3A),
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30), side: const BorderSide(color: Colors.tealAccent)),
+                      ),
+                      child: const Text('INITIALIZE SYSTEM', style: TextStyle(color: Colors.tealAccent)),
+                    ),
             ],
           ),
         ),
@@ -131,165 +95,180 @@ class _JarvisLoginScreenState extends State<JarvisLoginScreen> {
   }
 }
 
-// ==========================================
-// THE GIRGIT UI DASHBOARD (बाकी का सारा पुराना कोड सेम रहेगा)
-// ==========================================
-class MasterGirgitDashboard extends StatefulWidget {
-  const MasterGirgitDashboard({super.key});
+// ---------------- DASHBOARD (THE REAL GOD-MODE UI) ----------------
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
-  State<MasterGirgitDashboard> createState() => _MasterGirgitDashboardState();
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _MasterGirgitDashboardState extends State<MasterGirgitDashboard> {
-  String currentUIState = 'AI_CHAT'; 
-  bool isServerConnected = false;
+class _DashboardScreenState extends State<DashboardScreen> {
+  final List<Map<String, String>> _messages = [
+    {"role": "jarvis", "text": "Voice/Biometric Secured. Awaiting Command..."}
+  ];
+  final TextEditingController _chatController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _connectToRenderBackend(); 
-  }
-
-  Future<void> _connectToRenderBackend() async {
-    try {
-      final response = await http.get(Uri.parse('https://jarvis-backend-afg8.onrender.com/system-status'));
-      if (response.statusCode == 200) {
-        setState(() => isServerConnected = true);
-      }
-    } catch (e) {
-      setState(() => isServerConnected = false);
-    }
-  }
-
-  void transformUI(String newState) {
-    setState(() => currentUIState = newState);
-  }
-
-  Widget _buildGirgitInterface() {
-    switch (currentUIState) {
-      case 'VIDEO_STUDIO': return const CapCutVideoStudio();
-      case 'PHOTO_STUDIO': return const HighEndPhotoStudio();
-      case 'OFFICE_FORGE': return const OfficeForgeEditor();
-      case 'NEXUS_VAULT': return const NexusVaultArchive();
-      case 'SELF_EVOLUTION': return const SelfEvolutionConsole();
-      case 'FASHION_3D': return const Fashion3DEngine();
-      case 'AI_CHAT':
-      default: return AIChatInterface(onTransform: transformUI);
-    }
+  void _sendMessage() {
+    if (_chatController.text.trim().isEmpty) return;
+    setState(() {
+      _messages.add({"role": "user", "text": _chatController.text});
+      _messages.add({"role": "jarvis", "text": "Command received. Awaiting backend API to execute: '${_chatController.text}'"});
+      _chatController.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // --- TOP BAR ---
       appBar: AppBar(
-        title: Row(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.shield, color: Colors.redAccent),
+            onPressed: () => Scaffold.of(context).openDrawer(), // Drawer Open Button
+          ),
+        ),
+        title: const Text('Connecting...', style: TextStyle(color: Colors.tealAccent, fontSize: 16)),
+        actions: [
+          IconButton(icon: const Icon(Icons.style, color: Colors.pinkAccent), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.list, color: Colors.blueAccent), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.auto_awesome, color: Colors.yellowAccent), onPressed: () {}),
+        ],
+      ),
+      
+      // --- SIDEBAR (For History & Vault) ---
+      drawer: Drawer(
+        backgroundColor: const Color(0xFF1A1A1A),
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            Icon(Icons.security, color: isServerConnected ? Colors.greenAccent : Colors.redAccent, size: 18),
-            const SizedBox(width: 8),
-            Text(isServerConnected ? "System Online" : "Connecting...", 
-                style: const TextStyle(color: Colors.cyanAccent, fontSize: 14)),
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Color(0xFF0A3D3A)),
+              child: Text('J.A.R.V.I.S Menu\nGod-Mode Active', style: TextStyle(color: Colors.tealAccent, fontSize: 20)),
+            ),
+            ListTile(leading: const Icon(Icons.folder, color: Colors.blue), title: const Text('Nexus Vault'), onTap: () {}),
+            ListTile(leading: const Icon(Icons.history, color: Colors.grey), title: const Text('Command History'), onTap: () {}),
           ],
         ),
-        backgroundColor: Colors.black,
-        actions: [
-          IconButton(icon: const Icon(Icons.style, color: Colors.pinkAccent), onPressed: () => transformUI('FASHION_3D')),
-          IconButton(icon: const Icon(Icons.storage, color: Colors.blueAccent), onPressed: () => transformUI('NEXUS_VAULT')),
-          IconButton(icon: const Icon(Icons.auto_awesome, color: Colors.yellowAccent), onPressed: () => transformUI('SELF_EVOLUTION'))
-        ],
       ),
-      body: Stack(
+
+      body: Column(
         children: [
-          AnimatedSwitcher(duration: const Duration(milliseconds: 400), child: _buildGirgitInterface()),
-          const Positioned(top: 20, left: 20, child: CallManagerPIP()),
-          const Positioned(top: 20, right: 20, child: LiveCameraPIP()),
+          // --- CALL MANAGER & CAMERA WIDGETS ---
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(5)),
+                  child: const Text('Call Manager: ON', style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold)),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(color: const Color(0xFF1A1A1A), borderRadius: BorderRadius.circular(10)),
+                  child: const Icon(Icons.camera_alt, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+
+          // --- CHAT HISTORY AREA ---
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(15.0),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final msg = _messages[index];
+                final isUser = msg["role"] == "user";
+                return Align(
+                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: isUser ? const Color(0xFF0A3D3A) : const Color(0xFF1A1A1A),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Text(msg["text"]!, style: const TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // --- POWERFUL FEATURE BUTTONS ---
+          Container(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(icon: const Icon(Icons.thumb_up_alt_outlined, color: Colors.grey), onPressed: () {}),
+                    IconButton(icon: const Icon(Icons.refresh, color: Colors.grey), onPressed: () {}),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A2A3A), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                      icon: const Icon(Icons.download, color: Colors.cyanAccent),
+                      label: const Text('Save to Nexus', style: TextStyle(color: Colors.cyanAccent)),
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                      onPressed: () {},
+                      child: const Text('Office Forge', style: TextStyle(color: Colors.white)),
+                    ),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.white), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                      onPressed: () {},
+                      child: const Text('Video Studio', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // --- CHATGPT STYLE INPUT BOX ---
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1A1A1A),
+              border: Border(top: BorderSide(color: Colors.grey, width: 0.2)),
+            ),
+            child: Row(
+              children: [
+                IconButton(icon: const Icon(Icons.add, color: Colors.grey), onPressed: () {}), // Attachment
+                Expanded(
+                  child: TextField(
+                    controller: _chatController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Command J.A.R.V.I.S...',
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: const Color(0xFF2A2A2A),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
+                ),
+                IconButton(icon: const Icon(Icons.mic, color: Colors.tealAccent), onPressed: () {}),
+                IconButton(icon: const Icon(Icons.send, color: Colors.tealAccent), onPressed: _sendMessage),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
-}
-
-// --- MODULE 1: AI CHAT ---
-class AIChatInterface extends StatelessWidget {
-  final Function(String) onTransform;
-  const AIChatInterface({super.key, required this.onTransform});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Expanded(child: Center(child: Text("Voice/Biometric Secured. Awaiting Command...", style: TextStyle(color: Colors.grey)))),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 10), color: const Color(0xFF151515),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(icon: const Icon(Icons.thumb_up_alt_outlined, color: Colors.white54), onPressed: (){}),
-                  IconButton(icon: const Icon(Icons.refresh, color: Colors.white54), onPressed: (){}),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent.withOpacity(0.2)),
-                    icon: const Icon(Icons.save_alt, color: Colors.cyanAccent),
-                    label: const Text("Save to Nexus", style: TextStyle(color: Colors.cyanAccent)),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                children: [
-                  ActionChip(label: const Text("Office Forge"), onPressed: () => onTransform('OFFICE_FORGE')),
-                  ActionChip(label: const Text("Video Studio"), onPressed: () => onTransform('VIDEO_STUDIO')),
-                ],
-              )
-            ],
-          ),
-        )
-      ],
-    );
-  }
-}
-
-// --- MODULE 2 TO 6: (शॉर्टेंड फॉर UI) ---
-class NexusVaultArchive extends StatelessWidget {
-  const NexusVaultArchive({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text("NEXUS VAULT SECURED STORAGE", style: TextStyle(color: Colors.blueAccent, fontSize: 20)));
-}
-class OfficeForgeEditor extends StatelessWidget {
-  const OfficeForgeEditor({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text("DOCUMENT FORGE ACTIVE", style: TextStyle(color: Colors.greenAccent, fontSize: 20)));
-}
-class CapCutVideoStudio extends StatelessWidget {
-  const CapCutVideoStudio({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text("VIDEO STUDIO ACTIVE", style: TextStyle(color: Colors.purpleAccent, fontSize: 20)));
-}
-class HighEndPhotoStudio extends StatelessWidget {
-  const HighEndPhotoStudio({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text("PHOTO STUDIO ACTIVE", style: TextStyle(color: Colors.tealAccent, fontSize: 20)));
-}
-class Fashion3DEngine extends StatelessWidget {
-  const Fashion3DEngine({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text("3D FASHION TRY-ON", style: TextStyle(color: Colors.pinkAccent, fontSize: 20)));
-}
-class SelfEvolutionConsole extends StatelessWidget {
-  const SelfEvolutionConsole({super.key});
-  @override
-  Widget build(BuildContext context) => const Center(child: Text("SELF EVOLUTION PROTOCOL RUNNING", style: TextStyle(color: Colors.yellowAccent, fontSize: 20)));
-}
-class CallManagerPIP extends StatelessWidget {
-  const CallManagerPIP({super.key});
-  @override
-  Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(8), color: Colors.black87, child: const Text("Call Manager: ON", style: TextStyle(color: Colors.greenAccent, fontSize: 12)));
-}
-class LiveCameraPIP extends StatelessWidget {
-  const LiveCameraPIP({super.key});
-  @override
-  Widget build(BuildContext context) => Container(width: 80, height: 100, color: Colors.black87, child: const Icon(Icons.camera_alt, color: Colors.white54));
 }
