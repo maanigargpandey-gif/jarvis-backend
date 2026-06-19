@@ -1,22 +1,37 @@
 name: Build Jarvis APK
 on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { distribution: 'zulu', java-version: '17' }
-      - uses: subosito/flutter-action@v2
-        with: { channel: 'stable' }
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Resolve Dependencies
+        run: |
+          flutter clean
+          flutter pub get
+          # चेक करो कि सारी डिपेंडेंसीज़ डाउनलोड हो रही हैं या नहीं
+          flutter pub upgrade
+
       - name: Build APK
         run: |
-          flutter clean           # 1. पुरानी फाइलों को साफ़ करना जरूरी है
-          flutter pub get         # 2. सारी डिपेंडेंसीज दोबारा डाउनलोड करना
           flutter build apk --release
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Jarvis-GodMode-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release-*.apk
           
