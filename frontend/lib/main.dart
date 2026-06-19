@@ -1,39 +1,44 @@
-// (Main logic only - copy paste into main.dart)
-class DynamicDashboard extends StatefulWidget {
+// main.dart - Final God-Mode Integrated UI
+class MasterDashboard extends StatefulWidget {
   @override
-  _DynamicDashboardState createState() => _DynamicDashboardState();
+  _MasterDashboardState createState() => _MasterDashboardState();
 }
 
-class _DynamicDashboardState extends State<DynamicDashboard> {
-  String currentMode = 'AI_CHAT'; // Mode: AI_CHAT, EXCEL, MEDIA_EDIT, CRICKET
+class _MasterDashboardState extends State<MasterDashboard> {
+  String currentMode = 'AI_CHAT'; // Modes: AI_CHAT, EXCEL, MEDIA, CRICKET
+
+  void switchMode(String mode) {
+    setState(() { currentMode = mode; });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // 1. Dynamic UI Switcher
-        IndexedStack(
-          index: _getModeIndex(currentMode),
-          children: [
-            AIChatPage(),
-            ExcelEditorView(),
-            MediaEditorView(), // Photo/Video Eraser
-            CricketModeView(),
-          ],
-        ),
-        
-        // 2. Floating Camera PIP (25% Screen)
-        Positioned(
-          top: 50, right: 20,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.25,
-            height: 150,
-            decoration: BoxDecoration(border: Border.all(color: Colors.greenAccent)),
-            child: Text("LIVE CAMERA FEED", style: TextStyle(color: Colors.white)),
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Mode Switcher (Chameleon Mode)
+          IndexedStack(
+            index: _getModeIndex(),
+            children: [
+              AIChatInterface(onModeSwitch: switchMode), // Chat + Calculator + Timer
+              ExcelEditor(), // Excel/Doc Mode
+              MediaStudioEraser(), // Eraser + Media
+              CricketMode(), // Girgit/Cricket
+            ],
           ),
-        ),
-      ],
+          // Live Camera PIP
+          Positioned(top: 50, right: 20, child: LiveCameraContainer()),
+        ],
+      ),
     );
   }
-  int _getModeIndex(String mode) => {'AI_CHAT': 0, 'EXCEL': 1, 'MEDIA_EDIT': 2, 'CRICKET': 3}[mode] ?? 0;
+  
+  int _getModeIndex() {
+    switch(currentMode) {
+      case 'EXCEL': return 1;
+      case 'MEDIA': return 2;
+      case 'CRICKET': return 3;
+      default: return 0;
+    }
+  }
 }
