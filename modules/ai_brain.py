@@ -4,7 +4,6 @@ from modules.app_factory import build_flutter_app
 from modules.security_core import run_security_protocol
 
 async def execute_llm_logic(prompt: str, provider: str, api_keys: dict):
-    # dynamic key retrieval
     groq_key = api_keys.get("Groq") or Config.get_key("Groq")
     if not groq_key:
         return {"status": "error", "message": "Groq API Key is MISSING! Please install or check Render Env."}
@@ -15,7 +14,7 @@ async def execute_llm_logic(prompt: str, provider: str, api_keys: dict):
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers={"Authorization": f"Bearer {groq_key}"},
                 json={
-                    "model": "llama-3.1-70b-versatile",  # अपडेटेड नया स्टेबल मॉडल
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [{"role": "user", "content": prompt}]
                 },
                 timeout=120.0
