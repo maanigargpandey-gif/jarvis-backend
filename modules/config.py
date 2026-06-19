@@ -9,7 +9,6 @@ class Config:
 
     @staticmethod
     def get_key(provider: str) -> str:
-        # 1. पहले लोकल 'Dynamic Vault' में चेक करेगा
         try:
             if os.path.exists("data/keys.json"):
                 with open("data/keys.json", "r") as f:
@@ -19,11 +18,10 @@ class Config:
         except Exception:
             pass
             
-        # 2. अगर लोकल नहीं मिली, तो Render (Environment Variables) से उठाएगा
         if provider == "Groq":
             return os.getenv("Jarvis_Logic", "")
         if provider == "HF":
-            return os.getenv("HF_KEY", "free_mode_active")
+            return os.getenv("HF_KEY", "")
         return ""
 
     @staticmethod
