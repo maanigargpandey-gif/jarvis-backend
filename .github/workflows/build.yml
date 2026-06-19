@@ -18,10 +18,16 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build and Package
+      - name: Diagnostic and Build
         run: |
-          # हर कमांड से पहले फोल्डर के अंदर जाओ
+          echo "--- DEBUG: File Structure ---"
+          ls -R
+          echo "-----------------------------"
+          
+          # यहाँ हम उस फोल्डर में जा रहे हैं जहाँ से बिल्ड करना है
           cd frontend
+          
+          echo "--- Building APK ---"
           flutter clean
           flutter pub get
           flutter build apk --release
@@ -30,6 +36,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Jarvis-GodMode-APK
-          # पाथ अब बिल्कुल सही है, क्योंकि हमने frontend के अंदर बिल्ड किया है
           path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
