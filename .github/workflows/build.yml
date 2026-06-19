@@ -18,26 +18,30 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create and Build APK
+      - name: Prepare Android Project
         run: |
           cd frontend
-          flutter create .
-          
-          echo "--- APPLYING BULLETPROOF SDK FIX ---"
-          # यह कमांड्स हर तरह के compileSdk और minSdk को ढूँढकर फोर्सफुली अपडेट कर देंगी
-          sed -i -e 's/compileSdk.*/compileSdk 34/' android/app/build.gradle
-          sed -i -e 's/compileSdkVersion.*/compileSdkVersion 34/' android/app/build.gradle
-          sed -i -e 's/targetSdk.*/targetSdk 34/' android/app/build.gradle
-          sed -i -e 's/targetSdkVersion.*/targetSdkVersion 34/' android/app/build.gradle
-          sed -i -e 's/minSdk.*/minSdk 21/' android/app/build.gradle
-          sed -i -e 's/minSdkVersion.*/minSdkVersion 21/' android/app/build.gradle
-          echo "--- SDK FIX APPLIED ---"
-          
-          flutter clean
           flutter pub get
-          flutter build apk --release
+          # सुनिश्चित करें कि एंड्रॉइड प्रोजेक्ट के मेटाडाटा अपडेट हों
+          flutter create .
 
-      - name: Upload APK
+      - name: Apply SDK Patches
+        run: |
+          # यह कमांड्स हर उस फाइल को लक्षित करती हैं जो एंड्रॉइड कॉन्फ़िगरेशन तय करती है
+          # .gradle या .kts दोनों के लिए 'compileSdk' और 'minSdk' को फोर्स-सेट करना
+          find frontend/android -name "build.gradle*" -exec sed -i -e 's/compileSdk[ ]*=[ ]*[0-9]*/compileSdk = 34/g' {} +
+          find frontend/android -name "build.gradle*" -exec sed -i -e 's/compileSdk[ ]*[0-9]*/compileSdk 34/g' {} +
+          find frontend/android -name "build.gradle*" -exec sed -i -e 's/minSdk[ ]*=[ ]*[0-9]*/minSdk = 21/g' {} +
+          find frontend/android -name "build.gradle*" -exec sed -i -e 's/minSdk[ ]*[0-9]*/minSdk 21/g' {} +
+          find frontend/android -name "build.gradle*" -exec sed -i -e 's/targetSdk[ ]*=[ ]*[0-9]*/targetSdk = 34/g' {} +
+          find frontend/android -name "build.gradle*" -exec sed -i -e 's/targetSdk[ ]*[0-9]*/targetSdk 34/g' {} +
+
+      - name: Build Release APK
+        run: |
+          cd frontend
+          flutter build apk --release --split-per-abi
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Jarvis-GodMode-APK
