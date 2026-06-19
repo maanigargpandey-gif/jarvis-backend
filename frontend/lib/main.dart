@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.deepPurple,
+        scaffoldBackgroundColor: Color(0xFF121212),
         colorScheme: ColorScheme.dark(
           secondary: Colors.greenAccent,
         ),
@@ -38,8 +39,7 @@ class _LoginPageState extends State<LoginPage> {
       _validationError = null;
     });
     
-    // 1. THE CREATOR GATEWAY (God-Mode Lock)
-    // तुम यहाँ अपना नाम और पासवर्ड बदल सकते हो
+    // CREATOR GATEWAY (God-Mode Lock)
     if (_usernameController.text == 'Mani' && _passwordController.text == 'GodMode123') {
       Navigator.pushReplacement(
         context,
@@ -48,13 +48,11 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // 2. GUEST/STANDARD USER CHECK (Connects to your Render Backend)
+    // GUEST USER CHECK 
     try {
       final response = await http.post(
         Uri.parse('https://jarvis-backend-afg0.onrender.com/ultimate-jarvis'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'action': 'login',
           'role': 'guest',
@@ -66,10 +64,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       
       if (response.statusCode == 200) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => GuestDashboard()),
-        );
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => GuestDashboard()));
       } else {
         setState(() {
           _isValidating = false;
@@ -91,7 +86,6 @@ class _LoginPageState extends State<LoginPage> {
         title: Text('Jarvis OS Login', style: TextStyle(fontFamily: 'Courier')),
         backgroundColor: Colors.black,
       ),
-      backgroundColor: Color(0xFF121212),
       body: Padding(
         padding: const EdgeInsets.all(25.0),
         child: Column(
@@ -135,10 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
             if (_validationError != null) ...[
               SizedBox(height: 20),
-              Text(
-                _validationError!,
-                style: TextStyle(color: Colors.redAccent, fontSize: 16),
-              ),
+              Text(_validationError!, style: TextStyle(color: Colors.redAccent, fontSize: 16)),
             ],
           ],
         ),
@@ -154,13 +145,7 @@ class CreatorDashboard extends StatefulWidget {
 
 class _CreatorDashboardState extends State<CreatorDashboard> {
   int _currentIndex = 0;
-  final _tabs = [
-    'AI Chat',
-    'Media Studio',
-    'Doc Forge',
-    'App Builder',
-    'Settings',
-  ];
+  final _tabs = ['AI Chat', 'Media Studio', 'Doc Forge', 'App Builder', 'Settings'];
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +157,7 @@ class _CreatorDashboardState extends State<CreatorDashboard> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          AIChatPage(),
+          AIChatPage(), // <--- Jarvis's New Upgraded Page
           MediaStudioPage(),
           DocumentForgePage(),
           AppBuilderPage(),
@@ -186,12 +171,7 @@ class _CreatorDashboardState extends State<CreatorDashboard> {
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.black,
         type: BottomNavigationBarType.fixed,
-        items: _tabs
-            .map((label) => BottomNavigationBarItem(
-                  icon: Icon(Icons.memory),
-                  label: label,
-                ))
-            .toList(),
+        items: _tabs.map((label) => BottomNavigationBarItem(icon: Icon(Icons.memory), label: label)).toList(),
       ),
     );
   }
@@ -201,31 +181,113 @@ class GuestDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Jarvis OS Guest View'),
-        backgroundColor: Colors.grey[900],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lock_outline, size: 80, color: Colors.grey),
-            SizedBox(height: 20),
-            Text('Welcome to Restricted Guest Mode', style: TextStyle(fontSize: 18, color: Colors.redAccent)),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('Start Basic Chat'),
-            ),
-          ],
+      appBar: AppBar(title: Text('Jarvis OS Guest View'), backgroundColor: Colors.grey[900]),
+      body: Center(child: Text('Welcome to Restricted Guest Mode', style: TextStyle(color: Colors.redAccent))),
+    );
+  }
+}
+
+// --- JARVIS UPGRADED CHAT UI ---
+class AIChatPage extends StatefulWidget {
+  @override
+  _AIChatPageState createState() => _AIChatPageState();
+}
+
+class _AIChatPageState extends State<AIChatPage> {
+  final _messages = <String>[];
+  final _controller = TextEditingController();
+
+  void _sendMessage() {
+    if (_controller.text.trim().isEmpty) return;
+    setState(() {
+      _messages.add(_controller.text);
+      _controller.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.all(15),
+            itemCount: _messages.length,
+            itemBuilder: (context, index) {
+              return Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple[800],
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15),
+                      bottomLeft: Radius.circular(15),
+                    ),
+                    border: Border.all(color: Colors.greenAccent, width: 0.5),
+                  ),
+                  child: Text(
+                    _messages[index],
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-      ),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border(top: BorderSide(color: Colors.deepPurple)),
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.attach_file, color: Colors.greenAccent),
+                onPressed: () {
+                  // File Upload Option
+                },
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Message Jarvis...',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.grey[900],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.greenAccent,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.send, color: Colors.black),
+                  onPressed: _sendMessage,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
 // --- Placeholder Pages ---
-class AIChatPage extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text('Jarvis Ultimate AI Chat Active', style: TextStyle(color: Colors.greenAccent, fontSize: 20))); }
 class MediaStudioPage extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text('Media Studio & Generator Active', style: TextStyle(color: Colors.greenAccent, fontSize: 20))); }
 class DocumentForgePage extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text('Document Forge Engine Active', style: TextStyle(color: Colors.greenAccent, fontSize: 20))); }
 class AppBuilderPage extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text('App Factory & Compiler Active', style: TextStyle(color: Colors.greenAccent, fontSize: 20))); }
