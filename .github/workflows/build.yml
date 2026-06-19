@@ -18,17 +18,16 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Clean and Get Dependencies
+      - name: Build APK
         run: |
+          cd frontend
           flutter clean
           flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release
+          flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Jarvis-GodMode-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
