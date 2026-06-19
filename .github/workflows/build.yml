@@ -18,27 +18,9 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build and Force Config
+      - name: Build APK
         run: |
           cd frontend
           flutter pub get
-          
-          # 1. सभी डिपेंडेंसीज़ को नए SDK के लिए फोर्स करना
-          cat <<EOF > android/local.properties
-          sdk.dir=/usr/local/lib/android/sdk
-          flutter.sdk=/opt/hostedtoolcache/flutter/stable-x64
-          EOF
-          
-          # 2. सभी सब-प्रोजेक्ट्स के बिल्ड वर्ज़न को फोर्स ओवरराइड करना
-          echo "android.useAndroidX=true" > android/gradle.properties
-          echo "android.enableJetifier=true" >> android/gradle.properties
-          
-          # 3. बिल्ड कमांड में SDK 34 को डालना
-          flutter build apk --release --build-name=1.0 --build-number=1
-          
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Jarvis-GodMode-APK
-          path: frontend/build/app/outputs/flutter-apk/app-release-*.apk
+          flutter build apk --release
           
