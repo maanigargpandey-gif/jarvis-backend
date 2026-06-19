@@ -4,6 +4,10 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    # यहाँ गिटहब को बता रहे हैं कि सारा काम 'frontend' फोल्डर के अंदर ही करना है
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
@@ -18,12 +22,13 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK
+      - name: Clean and Get Dependencies
         run: |
-          cd frontend
           flutter clean
           flutter pub get
-          flutter build apk --release
+
+      - name: Build APK
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
