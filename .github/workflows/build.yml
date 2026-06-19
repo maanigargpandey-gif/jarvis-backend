@@ -18,30 +18,39 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Full Clean and Guaranteed Build
+      - name: The Tactical Nuke Build (Forcing Plugins)
         run: |
           cd frontend
           
-          # 1. पुराना कचरा और लॉक फाइल हटाना (यह सबसे अहम स्टेप है)
+          # 1. अपना घर साफ़ करना
           rm -rf android
-          rm -f pubspec.lock
-          
-          # 2. नया एंड्रॉइड फोल्डर बनाना
           flutter create --platforms=android .
           
-          # 3. प्लगइन्स को अपग्रेड करना (इससे battery_plus और geolocator खुद SDK 36 पर आ जाएंगे, कोई फीचर नहीं हटेगा)
-          flutter pub upgrade
+          # 2. सारे प्लगइन्स (जान) को डाउनलोड करना
+          flutter pub get
           
-          # 4. ऐप को सुरक्षित तरीके से SDK 36 पर फिक्स करना
-          sed -i 's/flutter.compileSdkVersion/36/g' android/app/build.gradle.kts || true
-          sed -i 's/flutter.targetSdkVersion/36/g' android/app/build.gradle.kts || true
-          sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts || true
+          # 3. THE TACTICAL NUKE (असली हैक)
+          # गिटहब के हिडन फोल्डर में घुसकर प्लगइन्स के हार्डकोडेड '33' को '34' में बदलना
+          echo "--- Hacking Pub Cache to force SDK 34 on all plugins ---"
+          find /opt/hostedtoolcache ~/.pub-cache -type f -name "build.gradle" -exec sed -i 's/compileSdkVersion 31/compileSdkVersion 34/g' {} + 2>/dev/null || true
+          find /opt/hostedtoolcache ~/.pub-cache -type f -name "build.gradle" -exec sed -i 's/compileSdkVersion 32/compileSdkVersion 34/g' {} + 2>/dev/null || true
+          find /opt/hostedtoolcache ~/.pub-cache -type f -name "build.gradle" -exec sed -i 's/compileSdkVersion 33/compileSdkVersion 34/g' {} + 2>/dev/null || true
           
-          # 5. Jetifier चालू करना
+          # कोटलिन फाइल्स के लिए भी सेम हैक
+          find /opt/hostedtoolcache ~/.pub-cache -type f -name "build.gradle.kts" -exec sed -i 's/compileSdk = 31/compileSdk = 34/g' {} + 2>/dev/null || true
+          find /opt/hostedtoolcache ~/.pub-cache -type f -name "build.gradle.kts" -exec sed -i 's/compileSdk = 32/compileSdk = 34/g' {} + 2>/dev/null || true
+          find /opt/hostedtoolcache ~/.pub-cache -type f -name "build.gradle.kts" -exec sed -i 's/compileSdk = 33/compileSdk = 34/g' {} + 2>/dev/null || true
+          
+          # 4. अपने मेन ऐप को सुरक्षित और बिना एरर के 34 देना
+          echo "flutter.compileSdkVersion=34" >> android/local.properties
+          echo "flutter.minSdkVersion=21" >> android/local.properties
+          echo "flutter.targetSdkVersion=34" >> android/local.properties
+          
+          # 5. पुराने प्लगइन्स को नए सिस्टम में ढालने के लिए Jetifier इनेबल करना
           echo "android.useAndroidX=true" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
           
-          # 6. फाइनल बिल्ड
+          # 6. फाइनल बिल्ड (अब कोई प्लगइन 33 पर नहीं अड़ेगा)
           flutter build apk --release
 
       - name: Upload APK
