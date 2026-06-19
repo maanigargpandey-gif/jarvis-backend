@@ -23,11 +23,15 @@ jobs:
           cd frontend
           flutter create .
           
-          # --- THE MASTER FIX FOR SDK 34 ---
-          # यह कमांड्स अपने आप android/app/build.gradle में SDK वर्ज़न को 34 कर देंगी
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/g' android/app/build.gradle || true
-          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' android/app/build.gradle || true
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle || true
+          echo "--- APPLYING BULLETPROOF SDK FIX ---"
+          # यह कमांड्स हर तरह के compileSdk और minSdk को ढूँढकर फोर्सफुली अपडेट कर देंगी
+          sed -i -e 's/compileSdk.*/compileSdk 34/' android/app/build.gradle
+          sed -i -e 's/compileSdkVersion.*/compileSdkVersion 34/' android/app/build.gradle
+          sed -i -e 's/targetSdk.*/targetSdk 34/' android/app/build.gradle
+          sed -i -e 's/targetSdkVersion.*/targetSdkVersion 34/' android/app/build.gradle
+          sed -i -e 's/minSdk.*/minSdk 21/' android/app/build.gradle
+          sed -i -e 's/minSdkVersion.*/minSdkVersion 21/' android/app/build.gradle
+          echo "--- SDK FIX APPLIED ---"
           
           flutter clean
           flutter pub get
