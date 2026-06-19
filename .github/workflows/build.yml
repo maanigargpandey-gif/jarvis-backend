@@ -18,9 +18,24 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK
+      - name: Force Clean and Rebuild Infrastructure
         run: |
           cd frontend
+          # 1. पुरानी एंड्रॉइड फाइल्स को पूरी तरह उखाड़ फेंकना
+          rm -rf android
+          
+          # 2. फ्लटर से नए, लेटेस्ट एंड्रॉइड स्ट्रक्चर को फिर से बनवाना
+          flutter create --platforms=android .
+          
+          # 3. सभी डिपेंडेंसीज़ को नए स्ट्रक्चर के हिसाब से लाना
           flutter pub get
+          
+          # 4. बिल्ड करना
           flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jarvis-GodMode-APK
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
