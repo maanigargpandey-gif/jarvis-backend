@@ -18,25 +18,17 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build and Patch APK
+      - name: Rebuild Android Infrastructure
         run: |
           cd frontend
-          flutter create .
+          # पुरानी एंड्रॉइड फाइल्स को जड़ से उखाड़ रहे हैं
+          rm -rf android
+          # अब लेटेस्ट स्ट्रक्चर के साथ नया एंड्रॉइड फोल्डर बना रहे हैं
+          flutter create --platforms=android .
           
-          # यहाँ हम build.gradle.kts को ही नया लिख रहे हैं, कोई छेड़छाड़ नहीं होगी
-          echo 'android {
-              compileSdk = 34
-              namespace = "com.example.jarvis_godmode"
-              defaultConfig {
-                  applicationId = "com.example.jarvis_godmode"
-                  minSdk = 21
-                  targetSdk = 34
-                  versionCode = 1
-                  versionName = "1.0"
-              }
-          }' > android/app/build.gradle.kts
-          
-          flutter clean
+      - name: Build APK
+        run: |
+          cd frontend
           flutter pub get
           flutter build apk --release
 
