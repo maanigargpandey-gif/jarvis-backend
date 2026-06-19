@@ -1,74 +1,42 @@
-name: Flutter Build APK
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+name: Build Jarvis APK
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Prepare Android Project and Force SDK 36
+      - name: Generate Android Build & Setup Properties
         run: |
           cd frontend
           
-          # 1. एंड्रोइड फोल्डर बनाना
+          # 1. नया एंड्रॉइड फोल्डर बनाना (Clean Slate)
           flutter create --platforms=android .
           
-          # 2. डिपेंडेंसीज डाउनलोड करना
+          # 2. डिपेंडेंसीज़ डाउनलोड करना
           flutter pub get
           
-          # 3. Jetifier इनेबल करना
+          # 3. ऑफिशियल तरीका: local.properties में SDK वर्ज़न सेट करना
+          # इससे Kotlin फाइल का सिंटैक्स बिल्कुल नहीं बिगड़ेगा
+          echo "flutter.compileSdkVersion=36" >> android/local.properties
+          echo "flutter.targetSdkVersion=36" >> android/local.properties
+          echo "flutter.minSdkVersion=21" >> android/local.properties
+          
+          # 4. पुराने प्लगइन्स को क्रैश होने से बचाने के लिए Jetifier इनेबल करना
           echo "android.useAndroidX=true" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
-          
-          # 4. मुख्य ऐप के SDK को 36 करना
-          sed -i 's/flutter.compileSdkVersion/36/g' android/app/build.gradle.kts
-          sed -i 's/flutter.targetSdkVersion/36/g' android/app/build.gradle.kts
-          sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts
-          
-          # 5. सभी सब-प्रोजेक्ट्स और प्लगइन्स (जैसे battery_plus) पर SDK 36 लागू करना
-          if [ -f android/build.gradle ]; then
-            echo "subprojects {" >> android/build.gradle
-            echo "    afterEvaluate { project ->" >> android/build.gradle
-            echo "        if (project.hasProperty('android')) {" >> android/build.gradle
-            echo "            project.android {" >> android/build.gradle
-            echo "                compileSdkVersion = 36" >> android/build.gradle
-            echo "            }" >> android/build.gradle
-            echo "        }" >> android/build.gradle
-            echo "    }" >> android/build.gradle
-            echo "}" >> android/build.gradle
-          fi
-
-          if [ -f android/build.gradle.kts ]; then
-            echo "subprojects {" >> android/build.gradle.kts
-            echo "    afterEvaluate {" >> android/build.gradle.kts
-            echo "        if (project.hasProperty(\"android\")) {" >> android/build.gradle.kts
-            echo "            val android = project.extensions.getByName(\"android\")" >> android/build.gradle.kts
-            echo "            android.setProperty(\"compileSdkVersion\", 36)" >> android/build.gradle.kts
-            echo "        }" >> android/build.gradle.kts
-            echo "    }" >> android/build.gradle.kts
-            echo "}" >> android/build.gradle.kts
-          fi
 
       - name: Compile Final APK
         run: |
@@ -78,6 +46,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
+          name: Jarvis-GodMode-APK
           path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
