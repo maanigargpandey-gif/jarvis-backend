@@ -1,1 +1,12 @@
-
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  camera: ^0.10.5+9           # कैमरा मोड के लिए
+  geolocator: ^10.1.0        # GPS के लिए
+  battery_plus: ^5.0.0       # बैटरी डेटा के लिए
+  device_info_plus: ^9.0.3   # वायरस स्कैन/सिस्टम हेल्थ के लिए
+  excel: ^4.0.0              # एक्सेल मोड के लिए
+  path_provider: ^2.1.1      # फाइल सेविंग के लिए
+  permission_handler: ^11.0.1
+  
