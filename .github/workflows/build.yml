@@ -18,29 +18,30 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Generate Android Build & Setup Properties
+      - name: Full Clean and Guaranteed Build
         run: |
           cd frontend
           
-          # 1. नया एंड्रॉइड फोल्डर बनाना (Clean Slate)
+          # 1. पुराना कचरा और लॉक फाइल हटाना (यह सबसे अहम स्टेप है)
+          rm -rf android
+          rm -f pubspec.lock
+          
+          # 2. नया एंड्रॉइड फोल्डर बनाना
           flutter create --platforms=android .
           
-          # 2. डिपेंडेंसीज़ डाउनलोड करना
-          flutter pub get
+          # 3. प्लगइन्स को अपग्रेड करना (इससे battery_plus और geolocator खुद SDK 36 पर आ जाएंगे, कोई फीचर नहीं हटेगा)
+          flutter pub upgrade
           
-          # 3. ऑफिशियल तरीका: local.properties में SDK वर्ज़न सेट करना
-          # इससे Kotlin फाइल का सिंटैक्स बिल्कुल नहीं बिगड़ेगा
-          echo "flutter.compileSdkVersion=36" >> android/local.properties
-          echo "flutter.targetSdkVersion=36" >> android/local.properties
-          echo "flutter.minSdkVersion=21" >> android/local.properties
+          # 4. ऐप को सुरक्षित तरीके से SDK 36 पर फिक्स करना
+          sed -i 's/flutter.compileSdkVersion/36/g' android/app/build.gradle.kts || true
+          sed -i 's/flutter.targetSdkVersion/36/g' android/app/build.gradle.kts || true
+          sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts || true
           
-          # 4. पुराने प्लगइन्स को क्रैश होने से बचाने के लिए Jetifier इनेबल करना
+          # 5. Jetifier चालू करना
           echo "android.useAndroidX=true" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
-
-      - name: Compile Final APK
-        run: |
-          cd frontend
+          
+          # 6. फाइनल बिल्ड
           flutter build apk --release
 
       - name: Upload APK
