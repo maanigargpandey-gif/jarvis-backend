@@ -71,13 +71,11 @@ async def ultimate_jarvis(cmd: Command):
     if not check_permission(cmd.role, cmd.action):
         raise HTTPException(status_code=403, detail="ACCESS DENIED: Role unauthorized.")
 
-    # Dynamic Retrieval of Keys
     api_keys = {
         "Groq": Config.get_key("Groq"),
         "HuggingFace_Uncensored": Config.get_key("HF")
     }
 
-    # --- CORE AUTOMATION ENDPOINTS ---
     if cmd.action == "backend_scan":
         return health_check()
 
@@ -89,38 +87,30 @@ async def ultimate_jarvis(cmd: Command):
             return {"status": "success", "message": f"Successfully installed new API Key for {prov}. System upgraded."}
         return {"status": "error", "message": "Invalid provider or api_key details."}
 
-    # --- 7 SYSTEM PILLARS ROUTING ---
-    # 1. Security Core
     if cmd.action in ["login", "system_scan"]: 
         return await run_security_protocol(cmd.action, cmd.role, cmd.details)
         
-    # 2. System Memory
     if cmd.action in ["save_memory", "retrieve_memory"]: 
         mem_action = "save" if cmd.action == "save_memory" else "retrieve"
         return await manage_memory(mem_action, cmd.role, cmd.details.get("data"))
         
-    # 3. AI Brain
     if cmd.action == "god_prompt": 
         prompt = cmd.details.get("task")
         return await execute_god_brain(prompt, "Groq", api_keys)
         
-    # 4. App Factory
     if cmd.action == "build_apk": 
         app_idea = cmd.details.get("idea")
         platform = cmd.details.get("platform", "android")
         return await build_flutter_app(app_idea, api_keys, platform)
         
-    # 5. Media Studio
     if cmd.action in ["create_image", "create_reel"]: 
         media_type = "image" if cmd.action == "create_image" else "reel"
         return await generate_media(media_type, cmd.details, api_keys)
         
-    # 6. Document Forge
     if cmd.action == "generate_doc": 
         doc_type = cmd.details.get("type")
         return await create_document(doc_type, cmd.details)
         
-    # 7. Social Vault
     if cmd.action in ["auto_post", "recover_password"]: 
         platform = cmd.details.get("platform")
         return await manage_social_task(cmd.action, platform, cmd.details, api_keys)
