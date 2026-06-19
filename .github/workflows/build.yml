@@ -1,50 +1,36 @@
-name: Build Jarvis APK
-on: [push]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      - name: Generate and Patch Android Build
+      - name: Configure Android SDK 36 and Force on Subprojects
         run: |
-          cd frontend
-          
-          # 1. एंड्रॉइड फोल्डर बनाना
-          flutter create --platforms=android .
-          
-          # 2. डिपेंडेंसीज़ डाउनलोड
-          flutter pub get
-          
-          # 3. Jetifier इनेबल (पुराने प्लगइन्स के लिए)
-          echo "android.useAndroidX=true" >> android/gradle.properties
-          echo "android.enableJetifier=true" >> android/gradle.properties
-          
-          # 4. सिर्फ एक बदलाव: अब हम 34 की जगह 36 (लेटेस्ट SDK) दे रहे हैं
+          # 1. मुख्य ऐप के SDK को 36 करना (जो आप पहले से कर रहे थे)
           sed -i 's/flutter.compileSdkVersion/36/g' android/app/build.gradle.kts
           sed -i 's/flutter.targetSdkVersion/36/g' android/app/build.gradle.kts
-          sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts
+          
+          # 2. सभी सब-प्रोजेक्ट्स और प्लगइन्स (जैसे battery_plus) को भी SDK 36 पर मजबूर करना
+          # अगर रूट फाइल Groovy (.gradle) है:
+          if [ -f android/build.gradle ]; then
+            cat << 'EOF' >> android/build.gradle
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          compileSdkVersion = 36
+                      }
+                  }
+              }
+          }
+          EOF
+          fi
 
-      - name: Compile Final APK
-        run: |
-          cd frontend
-          flutter build apk --release
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Jarvis-GodMode-APK
-          path: frontend/build/app/outputs/flutter-apk/app-release.apk
+          # अगर रूट फाइल Kotlin DSL (.gradle.kts) है:
+          if [ -f android/build.gradle.kts ]; then
+            cat << 'EOF' >> android/build.gradle.kts
+          subprojects {
+              afterEvaluate {
+                  if (project.hasProperty("android")) {
+                      val android = project.extensions.getByName("android")
+                      android.setProperty("compileSdkVersion", 36)
+                  }
+              }
+          }
+          EOF
+          fi
           
