@@ -10,14 +10,12 @@ def health_check():
         "system_status": "All Systems Nominal"
     }
     
-    # 1. डायरेक्टरी चेक
     required_dirs = ["data", "modules", "frontend/lib"]
     for d in required_dirs:
         if not os.path.exists(d):
             os.makedirs(d, exist_ok=True)
             report["fixed_issues"].append(f"Created missing directory: {d}")
             
-    # 2. लाइब्रेरी डिपेंडेंसी चेक
     required_libs = ["fastapi", "uvicorn", "httpx", "beautifulsoup4", "python-dotenv", "pydantic"]
     for lib in required_libs:
         try:
@@ -26,7 +24,6 @@ def health_check():
             subprocess.check_call([sys.executable, "-m", "pip", "install", lib])
             report["fixed_issues"].append(f"Installed missing library: {lib}")
             
-    # 3. परमिशन फाइल चेक
     if not os.path.exists("data/permissions.json"):
         with open("data/permissions.json", "w") as f:
             f.write('{"guest": ["god_prompt", "save_memory", "retrieve_memory"], "owner": ["all"]}')
