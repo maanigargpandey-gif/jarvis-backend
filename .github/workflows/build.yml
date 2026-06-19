@@ -18,9 +18,11 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK
+      - name: Create and Build
         run: |
           cd frontend
+          # यह कमांड मिसिंग Android/Gradle फाइल्स को जनरेट कर देगी
+          flutter create . 
           flutter clean
           flutter pub get
           flutter build apk --release
