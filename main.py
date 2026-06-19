@@ -59,6 +59,11 @@ class Command(BaseModel):
     role: str
     details: dict
 
+# === RENDER HEALTH CHECK FIX (The missing part) ===
+@app.get("/")
+async def root_health_check():
+    return {"status": "online", "system": "Jarvis God-Mode Backend is Active"}
+
 @app.get("/download-apk/{filename}")
 async def download_apk(filename: str):
     file_path = f"{APK_DIR}{filename}"
