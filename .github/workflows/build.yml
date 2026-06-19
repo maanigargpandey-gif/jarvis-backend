@@ -18,30 +18,29 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Prepare Android Project
+      - name: Build and Patch APK
         run: |
           cd frontend
-          flutter pub get
-          # सुनिश्चित करें कि एंड्रॉइड प्रोजेक्ट के मेटाडाटा अपडेट हों
           flutter create .
+          
+          # यहाँ हम build.gradle.kts को ही नया लिख रहे हैं, कोई छेड़छाड़ नहीं होगी
+          echo 'android {
+              compileSdk = 34
+              namespace = "com.example.jarvis_godmode"
+              defaultConfig {
+                  applicationId = "com.example.jarvis_godmode"
+                  minSdk = 21
+                  targetSdk = 34
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+          }' > android/app/build.gradle.kts
+          
+          flutter clean
+          flutter pub get
+          flutter build apk --release
 
-      - name: Apply SDK Patches
-        run: |
-          # यह कमांड्स हर उस फाइल को लक्षित करती हैं जो एंड्रॉइड कॉन्फ़िगरेशन तय करती है
-          # .gradle या .kts दोनों के लिए 'compileSdk' और 'minSdk' को फोर्स-सेट करना
-          find frontend/android -name "build.gradle*" -exec sed -i -e 's/compileSdk[ ]*=[ ]*[0-9]*/compileSdk = 34/g' {} +
-          find frontend/android -name "build.gradle*" -exec sed -i -e 's/compileSdk[ ]*[0-9]*/compileSdk 34/g' {} +
-          find frontend/android -name "build.gradle*" -exec sed -i -e 's/minSdk[ ]*=[ ]*[0-9]*/minSdk = 21/g' {} +
-          find frontend/android -name "build.gradle*" -exec sed -i -e 's/minSdk[ ]*[0-9]*/minSdk 21/g' {} +
-          find frontend/android -name "build.gradle*" -exec sed -i -e 's/targetSdk[ ]*=[ ]*[0-9]*/targetSdk = 34/g' {} +
-          find frontend/android -name "build.gradle*" -exec sed -i -e 's/targetSdk[ ]*[0-9]*/targetSdk 34/g' {} +
-
-      - name: Build Release APK
-        run: |
-          cd frontend
-          flutter build apk --release --split-per-abi
-
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Jarvis-GodMode-APK
