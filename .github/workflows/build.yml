@@ -18,11 +18,17 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create and Build
+      - name: Create and Build APK
         run: |
           cd frontend
-          # यह कमांड मिसिंग Android/Gradle फाइल्स को जनरेट कर देगी
-          flutter create . 
+          flutter create .
+          
+          # --- THE MASTER FIX FOR SDK 34 ---
+          # यह कमांड्स अपने आप android/app/build.gradle में SDK वर्ज़न को 34 कर देंगी
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/g' android/app/build.gradle || true
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' android/app/build.gradle || true
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle || true
+          
           flutter clean
           flutter pub get
           flutter build apk --release
