@@ -18,20 +18,33 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Force SDK 34 and Build
+      - name: Generate and Patch Android Build
         run: |
           cd frontend
-          # 1. सीधे gradle.properties में वर्जन लॉक करना (यह सबसे सॉलिड तरीका है)
-          echo "org.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64" > android/gradle.properties
+          
+          # 1. सबसे पहले एंड्रॉइड फोल्डर बना रहे हैं (क्योंकि वह गिटहब पर नहीं है)
+          flutter create --platforms=android .
+          
+          # 2. सारी डिपेंडेंसीज़ डाउनलोड कर रहे हैं
+          flutter pub get
+          
+          # 3. फोल्डर बनने के बाद, Jetifier इनेबल कर रहे हैं ताकि प्लगइन्स क्रैश न हों
           echo "android.useAndroidX=true" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
           
-          # 2. सभी सब-मॉड्यूल्स को SDK 34 पर फोर्स करना
-          find android -name "build.gradle" -exec sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' {} +
-          find android -name "build.gradle" -exec sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' {} +
-          find android -name "build.gradle" -exec sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/g' {} +
-          
-          # 3. क्लीन और बिल्ड
-          flutter pub get
+          # 4. सिर्फ वेरिएबल हटाकर '34' और '21' लिख रहे हैं (फाइल सुरक्षित रहेगी)
+          sed -i 's/flutter.compileSdkVersion/34/g' android/app/build.gradle.kts
+          sed -i 's/flutter.targetSdkVersion/34/g' android/app/build.gradle.kts
+          sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle.kts
+
+      - name: Compile Final APK
+        run: |
+          cd frontend
           flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jarvis-GodMode-APK
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
