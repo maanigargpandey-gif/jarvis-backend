@@ -18,19 +18,10 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Diagnostic and Build
+      - name: Build APK
+        # यहाँ ध्यान दो: एक ही लाइन में सारा काम हो रहा है, फोल्डर बदलने का मौका ही नहीं है
         run: |
-          echo "--- DEBUG: File Structure ---"
-          ls -R
-          echo "-----------------------------"
-          
-          # यहाँ हम उस फोल्डर में जा रहे हैं जहाँ से बिल्ड करना है
-          cd frontend
-          
-          echo "--- Building APK ---"
-          flutter clean
-          flutter pub get
-          flutter build apk --release
+          cd frontend && flutter clean && flutter pub get && flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
