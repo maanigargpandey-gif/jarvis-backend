@@ -2,8 +2,7 @@ name: Build Jarvis APK
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -24,19 +23,12 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Create App Skeleton & Build APK
+      - name: Create App and Build APK
         run: |
-          # 1. नया ऐप का ढांचा बनाओ
           flutter create jarvis_app
-          
-          # 2. हमारा बनाया हुआ कोड इस नए ऐप में डालो
           cp frontend/lib/main.dart jarvis_app/lib/main.dart
-          
-          # 3. नए ऐप के अंदर जाओ और HTTP पैकेज डालो (जार्विस को इंटरनेट से जोड़ने के लिए)
           cd jarvis_app
           flutter pub add http
-          
-          # 4. अब फाइनल APK बनाओ
           flutter build apk --release
 
       - name: Upload APK
