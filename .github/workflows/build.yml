@@ -1,53 +1,21 @@
-// (नीचे वाले हिस्से को अपने main.dart में AIChatPage क्लास के अंदर रिप्लेस कर दो)
-class _AIChatPageState extends State<AIChatPage> {
-  final _messages = <Map<String, String>>[]; // मैसेज + स्टेटस
-  final _controller = TextEditingController();
-  bool _isProcessing = false;
-
-  void _sendMessage() async {
-    if (_controller.text.trim().isEmpty) return;
-    
-    setState(() {
-      _messages.add({"sender": "user", "text": _controller.text});
-      _isProcessing = true;
-    });
-
-    // यहाँ हम तुम्हारा असली रेंडर सर्वर कॉल करेंगे
-    try {
-      final response = await http.post(
-        Uri.parse('https://jarvis-backend-afg0.onrender.com/ultimate-jarvis'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"action": "god_prompt", "role": "owner", "details": {"task": _controller.text}}),
-      );
-      
-      setState(() {
-        _isProcessing = false;
-        _messages.add({"sender": "jarvis", "text": "System Processed: ${response.statusCode == 200 ? 'Success' : 'Error'}"});
-      });
-    } catch (e) {
-      setState(() => _isProcessing = false);
-    }
-    _controller.clear();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (_isProcessing) 
-          LinearProgressIndicator(color: Colors.greenAccent), // प्रो-मोड लोडर
-        Expanded(
-          child: ListView.builder(
-            itemCount: _messages.length,
-            itemBuilder: (context, index) => ListTile(
-              title: Text(_messages[index]['text']!, 
-              style: TextStyle(color: _messages[index]['sender'] == 'jarvis' ? Colors.greenAccent : Colors.white)),
-            ),
-          ),
-        ),
-        // ... (नीचे इनपुट बार)
-      ],
-    );
-  }
-}
-
+name: Build Jarvis APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: 'zulu', java-version: '17' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: 'stable' }
+      - name: Build APK
+        run: |
+          flutter pub get
+          flutter build apk --release
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jarvis-GodMode-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          
