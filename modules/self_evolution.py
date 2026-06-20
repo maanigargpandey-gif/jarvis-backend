@@ -164,3 +164,33 @@ async def trigger_evolution(command: str):
             
     return await engine.evolve_feature(extracted_feature, "8K quality, unlimited tokens, 2026 standards")
                              
+# --- AUTO-BOOT SEQUENCE (DO NOT DELETE PREVIOUS CODE) ---
+# यह कोड सर्वर स्टार्ट होते ही डमी फीचर्स को एक्टिवेट करना शुरू कर देगा
+
+async def auto_activate_dummy_features():
+    print("\n[SYSTEM BOOT] 🚀 Initiating Auto-Evolution for Dummy Features...")
+    engine = EvolutionEngine()
+    
+    # जो फीचर्स अभी डमी हैं, उनकी लिस्ट
+    dummy_features = [
+        "csc_automation_and_form_filler",
+        "media_studio_4k",
+        "in_app_office_editor"
+    ]
+    
+    for feature in dummy_features:
+        print(f"\n[Auto-Boot] Attempting to evolve: {feature}...")
+        # जार्विस को खुद इंटरनेट पर भेजकर इसे एक्टिवेट करने का कमांड
+        result = await engine.evolve_feature(feature, "Free tier, max token limit, 2026 standards")
+        
+        if result["status"] == "evolved":
+            print(f"[Auto-Boot] ✅ SUCCESS: {feature} is now ACTIVE in backend!")
+        else:
+            print(f"[Auto-Boot] ⚠️ FAILED: Could not auto-evolve {feature}. Will try later.")
+            
+    print("\n[SYSTEM BOOT] 🎯 All background deployments finished. Ready for Creator!")
+
+# अगर यह फाइल सीधे रन होती है, तो ऑटो-बूट चला दो
+if __name__ == "__main__":
+    asyncio.run(auto_activate_dummy_features())
+    
