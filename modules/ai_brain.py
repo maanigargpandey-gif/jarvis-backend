@@ -76,18 +76,17 @@ async def process_command(request: CommandRequest):
 
     if "post" in command or "message" in command or "whatsapp" in command:
         result = trigger_n8n_automation(command)
-        return {"response": final_script if 'final_script' in locals() else result, "status": "success"}
+        return {"response": result, "status": "success"}
 
     raw_response = call_groq_llama3(command)
     safe_response = cross_check_result(command, raw_response)
     return {"response": safe_response, "status": "success"}
 
-# ----------------- THE BRIDGE (Error Fix) -----------------
+# ----------------- THE BRIDGE (एरर फिक्स के लिए जरूरी) -----------------
 async def execute_god_brain(task: str):
-    # यह वह फंक्शन है जिसे main.py कॉल करता है।
-    # हमने इसे यहाँ जोड़ दिया है ताकि ImportError न आए।
+    # यह main.py के लिए पुल है, इसके बिना main.py क्रैश हो रहा था
     response = call_groq_llama3(task)
-    return {"status": "success", "response": response}
+    return {"response": response, "status": "success"}
 
 if __name__ == "__main__":
     import uvicorn
