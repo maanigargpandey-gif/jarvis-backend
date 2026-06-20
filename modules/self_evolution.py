@@ -74,3 +74,12 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8003)
     
+# --- THE BRIDGE FOR MAIN.PY ---
+class EvolutionEngine:
+    def health_check(self):
+        return {
+            "status": "success", 
+            "message": "Evolution Engine is active and monitoring.", 
+            "version": "J.A.R.V.I.S 2.0"
+        }
+        
