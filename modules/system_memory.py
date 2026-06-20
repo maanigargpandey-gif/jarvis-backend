@@ -1,6 +1,6 @@
 import time, json, os
 
-def manage_memory(action, role, details):
+async def manage_memory(action, role, details):
     # पुराना लॉजिक (Save/Retrieve) बरकरार है
     if action == "save":
         # ... (पुराना save लॉजिक यहाँ रखो)
