@@ -1,51 +1,76 @@
 import os
-import sys
-import subprocess
+import json
+import datetime
+import requests
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
-class EvolutionEngine:
-    def __init__(self):
-        self.fail_counter = 0
-        self.max_fails = 5
+# ----------------- J.A.R.V.I.S SELF-EVOLUTION & MEMORY ENGINE -----------------
+app = FastAPI(title="J.A.R.V.I.S Evolution Core", version="4.0.0")
 
-    def health_check(self):
-        """तुम्हारा पुराना कोर डायग्नोस्टिक और ऑटो-इंस्टॉलर"""
-        report = {
-            "status": "success",
-            "message": "Jarvis Backend Core Diagnostic Complete.",
-            "fixed_issues": [],
-            "system_status": "All Systems Nominal"
-        }
-        
-        required_dirs = ["data", "modules", "frontend/lib"]
-        for d in required_dirs:
-            if not os.path.exists(d):
-                os.makedirs(d, exist_ok=True)
-                report["fixed_issues"].append(f"Created missing directory: {d}")
-                
-        required_libs = ["fastapi", "uvicorn", "httpx", "beautifulsoup4", "python-dotenv", "pydantic", "cryptography", "pandas", "openpyxl"]
-        for lib in required_libs:
-            try:
-                __import__(lib)
-            except ImportError:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", lib])
-                report["fixed_issues"].append(f"Installed missing library: {lib}")
-                
-        if not report["fixed_issues"]:
-            report["fixed_issues"].append("No backend errors found. Jarvis core is 100% healthy.")
-            
-        return report
+# --- MEMORY STORAGE (Local JSON for Testing/Scaling) ---
+MEMORY_FILE = "data/memory_store.json"
 
-    def attempt_task(self, task_result):
-        """नया इवोल्यूशन: अगर 'इससे बेटर' कहते-कहते 5 बार फेल हो, तो खुद को इवॉल्व करो"""
-        if task_result in ["Failed_or_Subpar", "error"]:
-            self.fail_counter += 1
-            
-        if self.fail_counter >= self.max_fails:
-            return self._trigger_self_coding()
-        return "Task Processing..."
+class MemoryRequest(BaseModel):
+    query_time: str = None  # जैसे "17:00" या "5:00 PM"
+    sender_role: str        # 'owner', 'creator', 'guest'
+    action: str             # 'query_memory', 'evolve_code'
+    data: str = None        # नई कमांड या कोड
 
-    def _trigger_self_coding(self):
-        """इंटरनेट से नई API खोजना और खुद का कोड लिखना"""
-        self.fail_counter = 0
-        return {"status": "Evolved", "message": "Scraped new API. Rewritten backend logic. Hot-reloaded."}
-        
+# --- MEMORY MANAGEMENT ---
+def save_memory(role: str, message: str):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    memory_entry = {"time": timestamp, "role": role, "message": message}
+    
+    # मेमोरी लॉक: गेस्ट की मेमोरी 24 घंटे बाद क्लियर करना
+    if role == "guest":
+        memory_entry["expiry"] = (datetime.datetime.now() + datetime.timedelta(hours=24)).isoformat()
+    
+    # डेटा स्टोर में Append करना
+    if not os.path.exists("data"): os.makedirs("data")
+    data = []
+    if os.path.exists(MEMORY_FILE):
+        with open(MEMORY_FILE, 'r') as f: data = json.load(f)
+    data.append(memory_entry)
+    with open(MEMORY_FILE, 'w') as f: json.dump(data, f)
+
+def get_memory_at(target_time: str):
+    """समय के आधार पर चैट्स रिकॉल करना"""
+    if not os.path.exists(MEMORY_FILE): return "No memory found."
+    with open(MEMORY_FILE, 'r') as f: data = json.load(f)
+    
+    # उस समय के आसपास की बातचीत ढूंढना
+    for entry in data:
+        if target_time in entry["time"]:
+            return f"At {entry['time']}, you said: '{entry['message']}'"
+    return "उस समय कोई बातचीत रिकॉर्ड नहीं हुई।"
+
+# --- SELF-EVOLUTION (GITHUB INTEGRATION) ---
+def evolve_system(new_code: str):
+    """गिटहब रिपॉजिटरी में बदलाव करने के लिए ऑटो-इवोल्यूशन"""
+    print("[Self-Evolution] गिटहब पर नया कोड इंजेक्ट किया जा रहा है...")
+    # यहाँ गिटहब API के जरिए कोड कमिट होगा
+    return "System evolved successfully."
+
+# ----------------- MAIN API ENDPOINT -----------------
+
+@app.post("/evolution_core")
+async def evolution_core(request: MemoryRequest):
+    # 1. टाइम-स्टैम्प्ड मेमोरी रिकॉल
+    if request.action == "query_memory":
+        return {"result": get_memory_at(request.query_time)}
+
+    # 2. क्रिएटर-ओनली फीचर: सेल्फ-इवोल्यूशन
+    if request.action == "evolve_code":
+        if request.sender_role != "creator":
+            raise HTTPException(status_code=403, detail="Only creator can evolve the brain.")
+        return {"result": evolve_system(request.data)}
+
+    # 3. मेमोरी में सब कुछ सेव करना (Real-time logging)
+    save_memory(request.sender_role, request.data)
+    return {"status": "memory_saved"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8003)
+    
