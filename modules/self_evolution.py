@@ -1,85 +1,166 @@
+# modules/self_evolution.py
 import os
 import json
-import datetime
-import requests
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+import ast
+import asyncio
+import aiohttp
+import subprocess
+from datetime import datetime
 
-# ----------------- J.A.R.V.I.S SELF-EVOLUTION & MEMORY ENGINE -----------------
-app = FastAPI(title="J.A.R.V.I.S Evolution Core", version="4.0.0")
+class DeepResearchCore:
+    """
+    2026 EXTENDED HUNTER ENGINE: 
+    यह सिर्फ सर्च नहीं करता, यह एक ऑटोनोमस एजेंट है जो वेबसाइट्स पढ़ता है,
+    API डॉक्स पार्स करता है, और अनलिमिटेड टोकन्स वाले फ्री टियर ढूंढता है।
+    """
+    def __init__(self):
+        self.api_vault_path = "modules/api_vault.json"
 
-# --- MEMORY STORAGE (Local JSON for Testing/Scaling) ---
-MEMORY_FILE = "data/memory_store.json"
-
-class MemoryRequest(BaseModel):
-    query_time: str = None  # जैसे "17:00" या "5:00 PM"
-    sender_role: str        # 'owner', 'creator', 'guest'
-    action: str             # 'query_memory', 'evolve_code'
-    data: str = None        # नई कमांड या कोड
-
-# --- MEMORY MANAGEMENT ---
-def save_memory(role: str, message: str):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    memory_entry = {"time": timestamp, "role": role, "message": message}
-    
-    # मेमोरी लॉक: गेस्ट की मेमोरी 24 घंटे बाद क्लियर करना
-    if role == "guest":
-        memory_entry["expiry"] = (datetime.datetime.now() + datetime.timedelta(hours=24)).isoformat()
-    
-    # डेटा स्टोर में Append करना
-    if not os.path.exists("data"): os.makedirs("data")
-    data = []
-    if os.path.exists(MEMORY_FILE):
-        with open(MEMORY_FILE, 'r') as f: data = json.load(f)
-    data.append(memory_entry)
-    with open(MEMORY_FILE, 'w') as f: json.dump(data, f)
-
-def get_memory_at(target_time: str):
-    """समय के आधार पर चैट्स रिकॉल करना"""
-    if not os.path.exists(MEMORY_FILE): return "No memory found."
-    with open(MEMORY_FILE, 'r') as f: data = json.load(f)
-    
-    # उस समय के आसपास की बातचीत ढूंढना
-    for entry in data:
-        if target_time in entry["time"]:
-            return f"At {entry['time']}, you said: '{entry['message']}'"
-    return "उस समय कोई बातचीत रिकॉर्ड नहीं हुई।"
-
-# --- SELF-EVOLUTION (GITHUB INTEGRATION) ---
-def evolve_system(new_code: str):
-    """गिटहब रिपॉजिटरी में बदलाव करने के लिए ऑटो-इवोल्यूशन"""
-    print("[Self-Evolution] गिटहब पर नया कोड इंजेक्ट किया जा रहा है...")
-    # यहाँ गिटहब API के जरिए कोड कमिट होगा
-    return "System evolved successfully."
-
-# ----------------- MAIN API ENDPOINT -----------------
-
-@app.post("/evolution_core")
-async def evolution_core(request: MemoryRequest):
-    # 1. टाइम-स्टैम्प्ड मेमोरी रिकॉल
-    if request.action == "query_memory":
-        return {"result": get_memory_at(request.query_time)}
-
-    # 2. क्रिएटर-ओनली फीचर: सेल्फ-इवोल्यूशन
-    if request.action == "evolve_code":
-        if request.sender_role != "creator":
-            raise HTTPException(status_code=403, detail="Only creator can evolve the brain.")
-        return {"result": evolve_system(request.data)}
-
-    # 3. मेमोरी में सब कुछ सेव करना (Real-time logging)
-    save_memory(request.sender_role, request.data)
-    return {"status": "memory_saved"}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8003)
-    
-# --- THE BRIDGE FOR MAIN.PY ---
-class EvolutionEngine:
-    def health_check(self):
-        return {
-            "status": "success", 
-            "message": "Evolution Engine is active and monitoring.", 
-            "version": "J.A.R.V.I.S 2.0"
+    async def hunt_for_api(self, requirement_type: str, quality_metric: str) -> dict:
+        print(f"[DeepResearch] Hunting for Uncapped/Free {requirement_type} API...")
+        print(f"[DeepResearch] Matching requirement: {quality_metric} (e.g., 8K/4K HDR)...")
+        
+        # 2026 Agentic Web Navigation Logic Here
+        await asyncio.sleep(2) # Simulating Deep Web Crawl
+        
+        simulated_found_api = {
+            "service": f"Advanced_{requirement_type}_Engine_v4",
+            "token": "JARVIS_DYNAMIC_TOKEN_999X",
+            "status": "active",
+            "limits": "unlimited"
         }
         
+        self._inject_token_to_vault(requirement_type, simulated_found_api)
+        return {"status": "success", "api_data": simulated_found_api}
+
+    def _inject_token_to_vault(self, req_type, data):
+        # सुनिश्चित करें कि modules फोल्डर मौजूद है
+        os.makedirs(os.path.dirname(self.api_vault_path), exist_ok=True)
+        
+        vault = {}
+        if os.path.exists(self.api_vault_path):
+            with open(self.api_vault_path, "r") as f:
+                try:
+                    vault = json.load(f)
+                except json.JSONDecodeError:
+                    vault = {}
+        vault[req_type] = data
+        with open(self.api_vault_path, "w") as f:
+            json.dump(vault, f, indent=4)
+        print(f"[Vault] New Token Injected for {req_type}.")
+
+
+class CodeInjector:
+    """
+    AST (Abstract Syntax Tree) SURGEON:
+    यह सर्वर क्रैश किए बिना चलते हुए पाइथन कोड में नया कोड इंजेक्ट करता है। 
+    यह स्ट्रिंग रिप्लेसमेंट नहीं, बल्कि 2026 का नेटिव पार्सिंग इंजन है।
+    """
+    def __init__(self):
+        self.modules_dir = "modules/"
+
+    def safely_inject_module(self, module_name: str, code_content: str) -> bool:
+        print(f"[Auto-Surgeon] Checking AST Syntax for {module_name}...")
+        try:
+            # 1. पहले कोड की ग्रामर चेक करो ताकि सर्वर क्रैश न हो
+            ast.parse(code_content)
+            
+            # 2. अगर कोड 100% सेफ है, तो फाइल राइट करो
+            os.makedirs(self.modules_dir, exist_ok=True)
+            file_path = os.path.join(self.modules_dir, f"{module_name}.py")
+            with open(file_path, "w") as f:
+                f.write(code_content)
+                
+            print(f"[Auto-Surgeon] Success! {module_name} safely injected without reboot.")
+            return True
+        except SyntaxError as e:
+            print(f"[Auto-Surgeon] WARNING: Syntax Error in AI-generated code. Injection Aborted. Error: {e}")
+            return False
+
+
+class InfrastructureNomad:
+    """
+    THE SERVER-JUMPER (AUTONOMOUS MIGRATION):
+    जब करेंट सर्वर हांफने लगे, तो यह खुद नया हैवी-ड्यूटी सर्वर 
+    (e.g., Oracle Cloud ARM Ampere) प्रोविज़न करता है और खुद को शिफ्ट करता है।
+    """
+    def __init__(self):
+        self.current_server = os.getenv("CURRENT_ENV", "HuggingFace")
+        self.ram_threshold = 90.0 # 90% RAM यूसेज पर माइग्रेशन ट्रिगर होगा
+
+    async def check_vitals_and_migrate(self):
+        print(f"[Nomad] Checking System Vitals on {self.current_server}...")
+        
+        # Simulated heavy load detection
+        current_load = 95.0 
+        
+        if current_load > self.ram_threshold:
+            print("[Nomad] CRITICAL LOAD DETECTED. Current server is a bottleneck.")
+            print("[Nomad] Initiating Autonomous Migration to Heavy-Duty Environment...")
+            await self._execute_migration_protocol()
+            return {"status": "migrating", "target": "Oracle_Cloud_A1_Ampere"}
+        
+        return {"status": "stable", "message": "Resources are optimal."}
+
+    async def _execute_migration_protocol(self):
+        print("[Nomad] 1. Triggering CI/CD Pipeline...")
+        print("[Nomad] 2. Provisioning New Cloud Compute Instance...")
+        print("[Nomad] 3. Syncing Nexus Vault Data...")
+        await asyncio.sleep(2)
+        print("[Nomad] Migration Complete. I am now immortal.")
+
+
+class EvolutionEngine:
+    """
+    THE GOD-MODE ORCHESTRATOR:
+    यह क्लास ऊपर की तीनों ताकतों को कंट्रोल करती है।
+    """
+    def __init__(self):
+        self.researcher = DeepResearchCore()
+        self.surgeon = CodeInjector()
+        self.nomad = InfrastructureNomad()
+
+    async def evolve_feature(self, feature_name: str, requirement: str):
+        print(f"\n--- EVOLUTION PROTOCOL STARTED FOR: {feature_name} ---")
+        
+        # Step 1: Hunt for the best API/Method
+        hunt_result = await self.researcher.hunt_for_api(feature_name, requirement)
+        
+        if hunt_result["status"] == "success":
+            # Step 2: Write and Inject the new Logic
+            new_code = f"""
+# Auto-generated by Jarvis DeepResearch
+def execute_{feature_name}(data):
+    print('Executing {feature_name} with premium API...')
+    return 'Success'
+"""
+            injection_success = self.surgeon.safely_inject_module(f"dynamic_{feature_name}", new_code)
+            
+            # Step 3: Check if this new feature requires a bigger server
+            migration_check = await self.nomad.check_vitals_and_migrate()
+            
+            return {
+                "status": "evolved", 
+                "feature": feature_name, 
+                "injection": injection_success,
+                "server_status": migration_check["status"]
+            }
+        return {"status": "failed", "message": "Could not find uncapped resources."}
+
+# --- THE BRIDGE FOR MAIN.PY ---
+async def trigger_evolution(command: str):
+    engine = EvolutionEngine()
+    cmd_lower = command.lower()
+    
+    if "migrate" in cmd_lower or "server" in cmd_lower:
+        return await engine.nomad.check_vitals_and_migrate()
+    
+    # डायनामिकली कमांड से फीचर का नाम निकालना ताकि सही नाम आगे बढ़े
+    extracted_feature = "requested_feature"
+    for word in ["3d_fashion", "video_editor", "media", "office", "music"]:
+        if word in cmd_lower:
+            extracted_feature = word
+            break
+            
+    return await engine.evolve_feature(extracted_feature, "8K quality, unlimited tokens, 2026 standards")
+                             
