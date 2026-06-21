@@ -1,17 +1,25 @@
-name: jarvis_godmode
-description: Final Unified God-Mode Build
+name: jarvis_app
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
 
-# यह है वो फिक्स जिसकी गिटहब को तलाश थी
 environment:
-  sdk: '>=3.12.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.2
   http: ^1.1.0
-  shared_preferences: ^2.2.1
-  provider: ^6.0.5
-  local_auth: ^2.1.7
-  path_provider: ^2.1.1
-  # (अगर फाइल पिकर वगैरह चाहिए तो भविष्य में जोड़ेंगे, अभी के लिए इतना काफी है)
-  
+  shared_preferences: ^2.2.0
+  permission_handler: ^11.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    
