@@ -1,40 +1,38 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // अपने लाइव बैकएंड का URL यहाँ डालें (जैसे Ngrok या क्लाउड URL)
-  static const String baseUrl = "https://your-backend-url.com"; 
+  // तुम्हारा लाइव Hugging Face का URL
+  static const String baseUrl = "https://maanigargpande-jarvis-backend.hf.space";
   
-  // बैकएंड सिक्योरिटी टोकन
-  static const String authToken = "YOUR_JARVIS_AUTH_TOKEN"; 
+  // तुम्हारा ऑथेंटिकेशन टोकन
+  static const String authToken = "mani_jarvis_admin_786"; 
 
-  // 1. मेन कमांड प्रोसेसिंग (विथ इवोल्यूशन टाइमआउट हैंडलिंग)
+  // 1. प्रोसेस कमांड भेजने का लॉजिक
   static Future<Map<String, dynamic>> processCommand(String command, String role) async {
     final url = Uri.parse('$baseUrl/process_command');
-    
+
     try {
-      // Self-Evolution के कारण टाइमआउट को 60 सेकंड रखा है
       final response = await http.post(
         url,
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $authToken",
-          "X-API-KEY": authToken // तुम्हारे बैकएंड में X-API-KEY भी है
+          "X-API-KEY": authToken 
         },
         body: jsonEncode({
           "command": command,
           "user_role": role,
-          "attachments": [] 
+          "attachments": [1]
         }),
-      ).timeout(const Duration(seconds: 60)); 
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
         return {
-          "status": "error", 
+          "status": "error",
           "message": "System Error: ${response.statusCode}",
           "type": "text"
         };
@@ -42,12 +40,12 @@ class ApiService {
     } on TimeoutException {
       return {
         "status": "evolving",
-        "message": "JARVIS is evolving and writing new code for this feature. Please wait...",
+        "message": "JARVIS is evolving. Please wait...",
         "type": "text"
       };
     } catch (e) {
       return {
-        "status": "error", 
+        "status": "error",
         "message": "Connection to Nexus failed. Check server.",
         "type": "text"
       };
@@ -56,14 +54,14 @@ class ApiService {
 
   // 2. Nexus Vault में फाइल सेव करने का लॉजिक
   static Future<Map<String, dynamic>> saveToNexusVault(String filePath, String role) async {
-    final url = Uri.parse('$baseUrl/process_command');
-    
+    final url = Uri.parse('$baseUrl/process_command'); 
+
     try {
       final response = await http.post(
         url,
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $authToken",
+          "Authorization": "Bearer $authToken"
         },
         body: jsonEncode({
           "command": "save_to_nexus",
