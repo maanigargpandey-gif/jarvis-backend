@@ -1,9 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jarvis.godmode">
     
-    <!-- THE MOST CRITICAL PERMISSION (ऐप को सर्वर से जोड़ने के लिए) -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    
-    <!-- BACKGROUND & HARDWARE PERMISSIONS (ऐप को बैकग्राउंड में ज़िंदा रखने के लिए) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
@@ -15,7 +12,7 @@
         android:label="JARVIS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"> <!-- यह HTTP CONNECTIONS को अलाउ करेगा -->
+        android:usesCleartextTraffic="true">
         
         <activity
             android:name=".MainActivity"
@@ -24,7 +21,6 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
             
-            <!-- थीम फिक्स -->
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme" />
@@ -34,11 +30,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <!-- 🔥 THIS IS THE MAGIC LINE THAT FIXES YOUR ERROR 🔥 -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
             
     </application>
-</manifest>
+    </manifest>
