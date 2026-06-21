@@ -1,6 +1,21 @@
-import json
 import os
+import json
+import asyncio
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
+app = FastAPI(title="J.A.R.V.I.S Identity & Auth Engine", version="3.0.0")
+
+# ====================================================================
+# 🛡️ THE SUPREME CREATOR CREDENTIALS (HARDCODED SECURITY)
+# ====================================================================
+MASTER_EMAIL = "maanigargpandey@gmail.com"
+MASTER_PHONE = "+918604141005"
+MASTER_PIN = "1005@Mani"
+
+# ====================================================================
+# 💾 OLD IDENTITY CORE LOGIC (Preserved for Biometric/Profile saving)
+# ====================================================================
 class IdentityCore:
     def __init__(self, config_path="data/owner_profile.json"):
         self.config_path = config_path
@@ -31,4 +46,65 @@ class IdentityCore:
         return None
 
 # यह चेक करेगा कि क्या ओनर पहले से सेट है
-identity = IdentityCore()
+identity_manager = IdentityCore()
+
+# ====================================================================
+# 🚦 CORE AUTHENTICATION ROUTER (Google / WhatsApp / Mobile)
+# ====================================================================
+class LoginRequest(BaseModel):
+    method: str     # 'google', 'whatsapp', 'mobile'
+    auth_data: str  # Email या Phone Number
+    pin: str = None # वेरिफिकेशन के लिए मास्टर पासवर्ड
+
+@app.post("/auth/verify_identity")
+async def verify_identity(request: LoginRequest):
+    try:
+        # डेटा क्लीनिंग (ताकि यूज़र गलती से स्पेस डाल दे तो भी मैच हो जाए)
+        auth_data_clean = request.auth_data.replace(" ", "").strip()
+        method = request.method.lower()
+
+        is_creator = False
+
+        # 1. क्रिएटर की पहचान (Google या Phone से)
+        if method == "google" and auth_data_clean.lower() == MASTER_EMAIL.lower():
+            is_creator = True
+        elif method in ["whatsapp", "mobile"] and auth_data_clean == MASTER_PHONE:
+            is_creator = True
+
+        # 2. अगर क्रिएटर पहचाना गया, तो मास्टर पिन चेक करो
+        if is_creator:
+            if request.pin == MASTER_PIN:
+                print("[SECURITY CLEARANCE] Supreme Creator 'Mani' has entered the Nexus.")
+                return {
+                    "status": "success",
+                    "user": "Mani",
+                    "role": "Creator",
+                    "clearance": "God-Mode",
+                    "message": "Welcome back, Master. All God-Mode systems are online."
+                }
+            else:
+                print("[SECURITY ALERT] Creator recognized, but invalid PIN attempt.")
+                return {
+                    "status": "pending_pin",
+                    "role": "Locked",
+                    "message": "Creator Identity Confirmed. Please enter the Master PIN ('1005@Mani') to proceed."
+                }
+        
+        # 3. अगर कोई और इंसान लॉगिन करता है (Guest Protocol)
+        else:
+            print(f"[SYSTEM LOG] Unrecognized user logged in via {method}: {auth_data_clean}")
+            return {
+                "status": "success",
+                "user": "Guest",
+                "role": "Guest",
+                "clearance": "Restricted Sandbox",
+                "message": "Identity registered as Guest. Advanced features are locked."
+            }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Core Security Engine Error: {str(e)}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8010)
+    
