@@ -9,6 +9,9 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.1.0
-  local_auth: ^2.1.7
   shared_preferences: ^2.2.1
   provider: ^6.0.5
+  local_auth: ^2.1.7
+  path_provider: ^2.1.1
+  # (अगर फाइल पिकर वगैरह चाहिए तो भविष्य में जोड़ेंगे, अभी के लिए इतना काफी है)
+  
