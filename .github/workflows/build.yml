@@ -14,10 +14,7 @@ jobs:
       - name: Build APK
         run: |
           cd frontend
-          rm -rf android
-          flutter create --platforms=android .
-          
-          # यहाँ हम फाइलें कॉपी कर रहे हैं
+          # अब कोई डिलीट या क्रिएट का झमेला नहीं है, सिर्फ कॉपी करेंगे
           cp ../android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
           mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
           cp ../android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
