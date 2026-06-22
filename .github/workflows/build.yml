@@ -13,23 +13,29 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK (Final Fix)
+      - name: Final Robust Build
         run: |
           cd frontend
           
-          # 1. नया प्रोजेक्ट स्ट्रक्चर बनाएं (चूंकि एंड्रॉइड फोल्डर नहीं है, यह काम करेगा)
-          flutter create .
+          # 1. सिर्फ तभी प्रोजेक्ट बनाएँ अगर एंड्रॉइड फोल्डर मौजूद न हो
+          if [ ! -d "android" ]; then
+            echo "Project structure missing. Creating..."
+            flutter create .
+          else
+            echo "Project structure exists. Skipping creation."
+          fi
           
-          # 2. अब फाइलें 'android_templates' से उठाकर एंड्रॉइड फोल्डर में डालें
-          # पाथ को फिक्स कर दिया है: अब ../ का इस्तेमाल नहीं है
+          # 2. टेम्पलेट्स को सुरक्षित पेस्ट करें (परमिशन्स और सेटिंग्स को ओवरराइट करेंगे)
+          # यह आपके द्वारा सेट की गई परमिशन्स को बरकरार रखेगा
           mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
           
+          echo "Applying your custom templates..."
           cp -f android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
           cp -f android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
           cp -f android_templates/build.gradle android/app/build.gradle
           cp -f android_templates/gradle.properties android/gradle.properties
           
-          # 3. बिल्ड करें
+          # 3. बिल्ड प्रोसेस
           flutter pub get
           flutter build apk --release
 
