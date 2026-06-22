@@ -1,66 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../services/background_service.dart';
 
 enum SecurityLevel { voice, face, biometrics, pin, recovery }
 enum ActiveTool { none, word, excel, ppt, pdf, video, photo, browser }
 
 class JarvisStateProvider extends ChangeNotifier {
-  // 1. Security State (Steps 1-4)
+  final _box = Hive.box('jarvis_data');
+
   SecurityLevel _currentLevel = SecurityLevel.voice;
   bool _isFullyAuthenticated = false;
-  
-  // 2. God Mode / UI State (Steps 8-10)
   ActiveTool _activeTool = ActiveTool.none;
   bool _isListening = false;
-  
-  // 3. System State (Step 11)
-  bool _isSystemRunning = false;
 
-  // Getters
   SecurityLevel get currentLevel => _currentLevel;
   bool get isFullyAuthenticated => _isFullyAuthenticated;
   ActiveTool get activeTool => _activeTool;
   bool get isListening => _isListening;
-  bool get isSystemRunning => _isSystemRunning;
 
-  JarvisStateProvider() { _initApp(); }
+  JarvisStateProvider() { _loadState(); }
 
-  Future<void> _initApp() async {
-    _currentLevel = SecurityLevel.voice;
+  // डेटाबेस से पिछला स्टेटस लोड करना
+  void _loadState() {
+    _isFullyAuthenticated = _box.get('auth', defaultValue: false);
     notifyListeners();
   }
 
-  // Security Logic
+  // सिक्योरिटी पास होने पर डेटा सेव करना
   void completeAuth() {
     _isFullyAuthenticated = true;
-    _startSystem(); // ऑथेंटिकेशन के बाद बैकग्राउंड सिस्टम चालू
-    notifyListeners();
-  }
-
-  // Background System Start
-  void _startSystem() {
-    _isSystemRunning = true;
+    _box.put('auth', true); 
     JarvisBackgroundService.startBackgroundTask();
     notifyListeners();
   }
 
-  // Tool Switching
+  // टूल सेट करना और सेव करना
   void setActiveTool(ActiveTool tool) {
     _activeTool = tool;
+    _box.put('last_tool', tool.index); // टूल का नंबर सेव कर लिया
     notifyListeners();
   }
 
-  // Floating AI Logic
+  // फ्लोटिंग AI
   void toggleListening() {
     _isListening = !_isListening;
     notifyListeners();
   }
 
-  // API Call Execution (Integrated)
-  Future<void> executeCommand(String command) async {
-    // यहाँ API कॉल आएगी जो हम स्टेप 5-7 में बना चुके हैं
-    debugPrint("Executing: $command");
+  // लॉगआउट पर सब कुछ डिलीट कर देना
+  Future<void> logout() async {
+    _isFullyAuthenticated = false;
+    await _box.clear();
     notifyListeners();
   }
 }
