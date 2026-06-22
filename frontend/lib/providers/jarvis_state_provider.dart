@@ -1,67 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../services/api_service.dart';
-import '../services/background_service.dart';
+import '../services/music_service.dart';
 
-enum SecurityLevel { voice, face, biometrics, pin, recovery }
-enum ActiveTool { none, word, excel, ppt, pdf, video, photo, browser }
+enum ActiveTool { none, word, excel, ppt, pdf, video, photo, browser, music, geo }
 
 class JarvisStateProvider extends ChangeNotifier {
   final _box = Hive.box('jarvis_data');
+  final MusicService _musicService = MusicService();
 
   // स्टेट्स
-  SecurityLevel _currentLevel = SecurityLevel.voice;
-  bool _isFullyAuthenticated = false;
   ActiveTool _activeTool = ActiveTool.none;
-  bool _isListening = false;
-  String _aiOutput = ""; // यह न्यूरल रिस्पॉन्स है
+  String _aiOutput = "Jarvis System Online..."; // Neural Output (Step 13)
+  bool _isMusicPlaying = false;
 
-  // गेटर्स
-  SecurityLevel get currentLevel => _currentLevel;
-  bool get isFullyAuthenticated => _isFullyAuthenticated;
   ActiveTool get activeTool => _activeTool;
-  bool get isListening => _isListening;
   String get aiOutput => _aiOutput;
+  bool get isMusicPlaying => _isMusicPlaying;
 
-  JarvisStateProvider() { _loadState(); }
-
-  void _loadState() {
-    _isFullyAuthenticated = _box.get('auth', defaultValue: false);
-    notifyListeners();
-  }
-
-  void completeAuth() {
-    _isFullyAuthenticated = true;
-    _box.put('auth', true);
-    JarvisBackgroundService.startBackgroundTask();
-    notifyListeners();
-  }
-
-  void setActiveTool(ActiveTool tool) {
-    _activeTool = tool;
-    notifyListeners();
-  }
-
-  // न्यूरल इंजन कमांड (लाइव स्ट्रीम)
+  // 1. Neural Engine Sync (Step 13)
   Future<void> executeNeuralCommand(String command) async {
     _aiOutput = "Thinking...";
     notifyListeners();
     
-    // स्ट्रीम लिसनर
     await for (final chunk in ApiService.streamAiResponse(command, "mani_jarvis_admin_786")) {
       _aiOutput = chunk;
       notifyListeners();
     }
   }
 
-  void toggleListening() {
-    _isListening = !_isListening;
+  // 2. Tool & Lifestyle Integration (Step 14)
+  void setActiveTool(ActiveTool tool) {
+    _activeTool = tool;
+    
+    // म्यूजिक या जिओ-स्फीयर ट्रिगर
+    if (tool == ActiveTool.music) {
+      _toggleMusic();
+    }
     notifyListeners();
   }
 
-  Future<void> logout() async {
-    _isFullyAuthenticated = false;
-    await _box.clear();
+  void _toggleMusic() {
+    _isMusicPlaying = !_isMusicPlaying;
+    if (_isMusicPlaying) {
+      _musicService.playBackgroundMusic("https://www.example.com/ambient_music.mp3");
+    } else {
+      _musicService.stopMusic();
+    }
     notifyListeners();
   }
 }
