@@ -14,17 +14,7 @@ jobs:
       - name: Build APK
         run: |
           cd frontend
-          # 1. Flutter प्रोजेक्ट को सही से सेटअप करें
-          flutter create .
-          
-          # 2. फोल्डर स्ट्रक्चर सुनिश्चित करें
-          mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
-          
-          # 3. $GITHUB_WORKSPACE का उपयोग करके फाइल्स कॉपी करें (यह कभी फेल नहीं होगा)
-          cp $GITHUB_WORKSPACE/android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          cp $GITHUB_WORKSPACE/android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          
-          # 4. बिल्ड चलाएं
+          # अब हमें कॉपी करने की ज़रूरत नहीं है क्योंकि हमने फाइलें सही जगह डाल दी हैं
           flutter pub get
           flutter build apk --release
 
