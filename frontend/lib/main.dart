@@ -21,17 +21,16 @@ class JarvisApp extends StatelessWidget {
     return MaterialApp(
       title: 'JARVIS',
       debugShowCheckedModeBanner: false,
-      // Sleek System-aware Theme
       themeMode: ThemeMode.system, 
       theme: ThemeData(
         brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF5F5F7), // Apple-like clean light mode
+        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
         primaryColor: Colors.black,
         fontFamily: 'Roboto',
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0A0A), // Deep dark
+        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
         primaryColor: Colors.white,
         fontFamily: 'Roboto',
       ),
