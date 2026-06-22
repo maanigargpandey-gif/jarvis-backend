@@ -4,6 +4,7 @@ import 'providers/jarvis_state_provider.dart';
 import 'auth_gate.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [
@@ -21,7 +22,22 @@ class JarvisApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(), // डार्क मोड 'God Mode' के लिए बेस्ट है
+      title: 'JARVIS OS',
+      theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
+        primaryColor: Colors.black,
+        fontFamily: 'Roboto',
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
+        primaryColor: Colors.white,
+        fontFamily: 'Roboto',
+      ),
+      themeMode: ThemeMode.system,
+      // यह हमारे 11 स्टेप्स का 'मेन गेट' है। 
+      // यह चेक करेगा कि यूजर ने Voice -> Face -> Biometric लेयर पार की है या नहीं।
       home: const AuthGate(),
     );
   }
