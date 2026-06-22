@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/jarvis_state_provider.dart';
 import 'screens/jarvis_main_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => JarvisStateProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => JarvisStateProvider()),
+      ],
       child: const JarvisApp(),
     ),
   );
@@ -19,9 +22,9 @@ class JarvisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'JARVIS',
+      title: 'JARVIS OS',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system, 
+      themeMode: ThemeMode.system,
       theme: ThemeData(
         brightness: Brightness.light,
         scaffoldBackgroundColor: const Color(0xFFF5F5F7),
@@ -34,7 +37,12 @@ class JarvisApp extends StatelessWidget {
         primaryColor: Colors.white,
         fontFamily: 'Roboto',
       ),
-      home: const JarvisMainScreen(),
+      // यहाँ 'गेटकीपर' (AuthGate) काम कर रहा है
+      home: Consumer<JarvisStateProvider>(
+        builder: (context, auth, _) {
+          return auth.isLoggedIn ? const JarvisMainScreen() : const LoginScreen();
+        },
+      ),
     );
   }
 }
