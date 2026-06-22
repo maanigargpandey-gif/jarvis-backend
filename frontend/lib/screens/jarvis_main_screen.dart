@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart'; // नई लाइन
 
 class JarvisMainScreen extends StatefulWidget {
   const JarvisMainScreen({super.key});
@@ -9,7 +10,23 @@ class JarvisMainScreen extends StatefulWidget {
 
 class _JarvisMainScreenState extends State<JarvisMainScreen> {
   final TextEditingController _textController = TextEditingController();
-  bool isListening = false; // Voice mode toggle
+  bool isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestPermissions(); // ऐप खुलते ही परमिशन मांगेगा
+  }
+
+  // नई फंक्शन: एंड्रॉइड से परमिशन मांगने के लिए
+  Future<void> _requestPermissions() async {
+    await [
+      Permission.microphone,
+      Permission.camera,
+      Permission.storage,
+      Permission.internet,
+    ].request();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +63,8 @@ class _JarvisMainScreenState extends State<JarvisMainScreen> {
           children: [
             Expanded(
               child: isListening 
-                ? _buildVoiceInterface(isDark) // Gemini-style voice mode
-                : _buildChatInterface(textColor), // Normal Chat
+                ? _buildVoiceInterface(isDark)
+                : _buildChatInterface(textColor),
             ),
             _buildSleekInputBar(isDark),
           ],
@@ -56,7 +73,6 @@ class _JarvisMainScreenState extends State<JarvisMainScreen> {
     );
   }
 
-  // Gemini-Live Style Voice Interface
   Widget _buildVoiceInterface(bool isDark) {
     return Center(
       child: Column(
@@ -76,7 +92,6 @@ class _JarvisMainScreenState extends State<JarvisMainScreen> {
       children: [
         Center(child: Text("Today", style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 12))),
         const SizedBox(height: 20),
-        // Chat bubbles will go here
       ],
     );
   }
