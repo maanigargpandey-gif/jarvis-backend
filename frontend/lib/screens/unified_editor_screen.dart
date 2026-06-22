@@ -11,28 +11,35 @@ class UnifiedEditorScreen extends StatelessWidget {
     final provider = Provider.of<JarvisStateProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text("God Mode: ${provider.activeTool.name.toUpperCase()}")),
+      appBar: AppBar(title: const Text("Neural Engine: Active")),
       body: Stack(
         children: [
-          // Row: Toolkit (Sidebar) + Main Area
           Row(
             children: [
-              // Sidebar (Context-Aware)
-              Container(
-                width: 280,
-                color: Colors.black87,
-                child: _buildSidebar(provider.activeTool),
-              ),
-              // Main Workspace
+              // Sidebar: Context-Aware Tools
+              Container(width: 280, color: Colors.black87, child: _buildSidebar(provider.activeTool)),
+              
+              // Main Canvas + Live Neural Output
               Expanded(
                 child: Container(
                   color: Colors.grey[900],
-                  child: Center(child: Text("Workspace: ${provider.activeTool.name}")),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Text("Workspace Area", style: TextStyle(color: Colors.white)),
+                      const SizedBox(height: 20),
+                      // न्यूरल रिस्पॉन्स यहाँ दिखेगा
+                      Container(
+                        padding: const EdgeInsets.all(15),
+                        color: Colors.blueGrey.withOpacity(0.3),
+                        child: Text(provider.aiOutput, style: const TextStyle(color: Colors.greenAccent, fontSize: 16)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          // Floating AI (Always on top)
           const AiAssistantOverlay(),
         ],
       ),
@@ -40,11 +47,9 @@ class UnifiedEditorScreen extends StatelessWidget {
   }
 
   Widget _buildSidebar(ActiveTool tool) {
-    // यहाँ टूल के हिसाब से टूल्स बदलते हैं
     List<String> items = [];
     if (tool == ActiveTool.word) items = ["Bold", "Italic", "Font", "Highlight"];
-    else if (tool == ActiveTool.video) items = ["Trim", "Cut", "Filters", "Effects"];
-    else if (tool == ActiveTool.photo) items = ["AI Remove BG", "Crop", "Enhance"];
+    else if (tool == ActiveTool.video) items = ["Trim", "Cut", "Filters"];
     
     return ListView(
       children: [
