@@ -4,8 +4,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java & Flutter
@@ -13,27 +11,24 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Final Robust Build
+      - name: Robust Build with Template Injection
         run: |
           cd frontend
           
-          # 1. सिर्फ तभी प्रोजेक्ट बनाएँ अगर एंड्रॉइड फोल्डर मौजूद न हो
+          # 1. प्रोजेक्ट स्ट्रक्चर बनाएं (अगर नहीं है तो)
           if [ ! -d "android" ]; then
-            echo "Project structure missing. Creating..."
             flutter create .
-          else
-            echo "Project structure exists. Skipping creation."
           fi
           
-          # 2. टेम्पलेट्स को सुरक्षित पेस्ट करें (परमिशन्स और सेटिंग्स को ओवरराइट करेंगे)
-          # यह आपके द्वारा सेट की गई परमिशन्स को बरकरार रखेगा
+          # 2. ये कमांड आपके 'android_templates' से फाइलें उठाकर
+          # सीधे 'android' फोल्डर के अंदर पेस्ट कर देगी।
+          # यह ऑटोमैटिक है, आपको कुछ मैन्युअली करने की जरूरत नहीं है।
+          
+          echo "Injecting templates..."
           mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
           
-          echo "Applying your custom templates..."
-          cp -f android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          cp -f android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          cp -f android_templates/build.gradle android/app/build.gradle
-          cp -f android_templates/gradle.properties android/gradle.properties
+          # यहाँ हम फाइलों को ओवरराइट कर रहे हैं ताकि आपकी सेटिंग्स पक्की हो जाएं
+          cp -rf android_templates/* android/
           
           # 3. बिल्ड प्रोसेस
           flutter pub get
