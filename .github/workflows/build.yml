@@ -13,32 +13,36 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK (The Nuclear Way - Final)
+      - name: Clean & Build APK
         run: |
           cd frontend
           
-          # 1. एक नया फ्रेश प्रोजेक्ट बनाएं
-          flutter create new_app
+          # 1. पूरी तरह क्लीन स्लेट (सबसे ज्यादा जरूरी)
+          rm -rf android
+          rm -rf .gradle
+          rm -rf .idea
+          rm -f local.properties
           
-          # 2. अपने असली कोड (lib, pubspec) को इस फ्रेश प्रोजेक्ट में कॉपी करें
-          cp -r lib/* new_app/lib/
-          cp pubspec.yaml new_app/pubspec.yaml
+          # 2. नया प्रोजेक्ट क्रिएट करें
+          flutter create .
           
-          # 3. फाइल्स को सीधे android_templates से new_app के अंदर कॉपी करें
-          # अब हम फोल्डर के अंदर नहीं घुस रहे, इसलिए पाथ एरर नहीं आएगा
-          mkdir -p new_app/android/app/src/main/kotlin/com/jarvis/godmode/
-          cp -f android_templates/AndroidManifest.xml new_app/android/app/src/main/AndroidManifest.xml
-          cp -f android_templates/MainActivity.kt new_app/android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          cp -f android_templates/build.gradle new_app/android/app/build.gradle
-          cp -f android_templates/gradle.properties new_app/gradle.properties
+          # 3. परमिशन और ग्रेडिल फाइलें डालें
+          # हम एक-एक करके फाइलें डाल रहे हैं ताकि कोई पाथ एरर न हो
+          mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
+          cp -f ../android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          cp -f ../android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          cp -f ../android_templates/build.gradle android/app/build.gradle
+          cp -f ../android_templates/gradle.properties android/gradle.properties
           
-          # 4. अब new_app में जाकर बिल्ड करें
-          cd new_app
+          # 4. बिल्ड करने से पहले डिपेंडेंसीज़ पक्की करें
           flutter pub get
+          
+          # 5. APK बिल्ड
           flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Jarvis-GodMode-APK
-          path: frontend/new_app/build/app/outputs/flutter-apk/app-release.apk
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
+          
