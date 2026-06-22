@@ -13,16 +13,18 @@ jobs:
       
       - name: Build APK
         run: |
-          # 1. सबसे पहले फोल्डर बनाओ (अगर नहीं है तो)
-          mkdir -p frontend/android/app/src/main/kotlin/com/jarvis/godmode/
-          
-          # 2. फाइल्स को यहाँ से वहां कॉपी करो (बिना किसी cd के पंगे के)
-          # अब हम रूट (Root) से कॉपी कर रहे हैं, जो सबसे सेफ तरीका है
-          cp android_templates/AndroidManifest.xml frontend/android/app/src/main/AndroidManifest.xml
-          cp android_templates/MainActivity.kt frontend/android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          
-          # 3. अब बिल्ड शुरू करो
           cd frontend
+          # 1. एंड्रॉइड फोल्डर सुरक्षित रूप से सुनिश्चित करें
+          flutter create .
+          
+          # 2. आवश्यक फोल्डर पाथ बनाएं
+          mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
+          
+          # 3. फाइल्स को कॉपी करें (यह कमांड अब फेल नहीं होगी)
+          cp ../android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          cp ../android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          
+          # 4. बिल्ड प्रक्रिया
           flutter pub get
           flutter build apk --release
 
@@ -31,4 +33,4 @@ jobs:
         with:
           name: Jarvis-GodMode-APK
           path: frontend/build/app/outputs/flutter-apk/app-release.apk
-          
+          p
