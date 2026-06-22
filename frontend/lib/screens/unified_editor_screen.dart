@@ -11,29 +11,29 @@ class UnifiedEditorScreen extends StatelessWidget {
     final provider = Provider.of<JarvisStateProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Neural Engine: Active")),
+      appBar: AppBar(title: const Text("God Mode: Neural Integrated")),
       body: Stack(
         children: [
           Row(
             children: [
-              // Sidebar: Context-Aware Tools
-              Container(width: 280, color: Colors.black87, child: _buildSidebar(provider.activeTool)),
+              // Sidebar: Smart Toolkit (Step 14 integrated)
+              Container(width: 280, color: Colors.black87, child: _buildSidebar(provider)),
               
-              // Main Canvas + Live Neural Output
+              // Main Canvas + Neural Live Output (Step 13 integrated)
               Expanded(
                 child: Container(
                   color: Colors.grey[900],
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      const Text("Workspace Area", style: TextStyle(color: Colors.white)),
-                      const SizedBox(height: 20),
-                      // न्यूरल रिस्पॉन्स यहाँ दिखेगा
+                      // Neural Output Window
                       Container(
+                        height: 150,
                         padding: const EdgeInsets.all(15),
-                        color: Colors.blueGrey.withOpacity(0.3),
-                        child: Text(provider.aiOutput, style: const TextStyle(color: Colors.greenAccent, fontSize: 16)),
+                        color: Colors.blueGrey.withOpacity(0.2),
+                        child: Text(provider.aiOutput, style: const TextStyle(color: Colors.greenAccent)),
                       ),
+                      const Expanded(child: Center(child: Text("Main Canvas: Active Tool View"))),
                     ],
                   ),
                 ),
@@ -46,19 +46,24 @@ class UnifiedEditorScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSidebar(ActiveTool tool) {
-    List<String> items = [];
-    if (tool == ActiveTool.word) items = ["Bold", "Italic", "Font", "Highlight"];
-    else if (tool == ActiveTool.video) items = ["Trim", "Cut", "Filters"];
-    
+  Widget _buildSidebar(JarvisStateProvider provider) {
     return ListView(
       children: [
-        ExpansionTile(
-          initiallyExpanded: true,
-          title: Text(tool.name.toUpperCase(), style: const TextStyle(color: Colors.white)),
-          children: items.map((i) => ListTile(title: Text(i, style: const TextStyle(color: Colors.white70)))).toList(),
-        ),
+        _buildExpansion("Office Tools", [ActiveTool.word, ActiveTool.excel, ActiveTool.pdf], provider),
+        _buildExpansion("Media & Neural", [ActiveTool.video, ActiveTool.photo], provider),
+        _buildExpansion("Live Systems", [ActiveTool.music, ActiveTool.geo, ActiveTool.browser], provider),
       ],
+    );
+  }
+
+  Widget _buildExpansion(String title, List<ActiveTool> tools, JarvisStateProvider provider) {
+    return ExpansionTile(
+      initiallyExpanded: true,
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      children: tools.map((tool) => ListTile(
+        title: Text(tool.name.toUpperCase(), style: const TextStyle(color: Colors.white70)),
+        onTap: () => provider.setActiveTool(tool),
+      )).toList(),
     );
   }
 }
