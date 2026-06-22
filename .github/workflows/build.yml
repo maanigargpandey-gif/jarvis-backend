@@ -11,26 +11,27 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Robust Build with Template Injection
+      - name: Force Clean and Build
         run: |
           cd frontend
           
-          # 1. प्रोजेक्ट स्ट्रक्चर बनाएं (अगर नहीं है तो)
-          if [ ! -d "android" ]; then
-            flutter create .
-          fi
+          # 1. कचरा हटाना (sudo का इस्तेमाल करके ताकि परमिशन का रोना न हो)
+          echo "Forcing deletion of existing android folder..."
+          sudo rm -rf android
+          sudo rm -rf .gradle
           
-          # 2. ये कमांड आपके 'android_templates' से फाइलें उठाकर
-          # सीधे 'android' फोल्डर के अंदर पेस्ट कर देगी।
-          # यह ऑटोमैटिक है, आपको कुछ मैन्युअली करने की जरूरत नहीं है।
+          # 2. नया प्रोजेक्ट बनाना
+          echo "Creating new project structure..."
+          flutter create .
           
-          echo "Injecting templates..."
+          # 3. आपकी टेम्प्लेट फाइलें डालना
           mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
+          cp -f android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          cp -f android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          cp -f android_templates/build.gradle android/app/build.gradle
+          cp -f android_templates/gradle.properties android/gradle.properties
           
-          # यहाँ हम फाइलों को ओवरराइट कर रहे हैं ताकि आपकी सेटिंग्स पक्की हो जाएं
-          cp -rf android_templates/* android/
-          
-          # 3. बिल्ड प्रोसेस
+          # 4. बिल्ड
           flutter pub get
           flutter build apk --release
 
