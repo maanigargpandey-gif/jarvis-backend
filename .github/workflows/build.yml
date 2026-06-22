@@ -13,27 +13,27 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK (The Nuclear Way)
+      - name: Build APK (The Nuclear Way - Final)
         run: |
+          cd frontend
+          
           # 1. एक नया फ्रेश प्रोजेक्ट बनाएं
           flutter create new_app
           
           # 2. अपने असली कोड (lib, pubspec) को इस फ्रेश प्रोजेक्ट में कॉपी करें
-          cp -r frontend/lib/* new_app/lib/
-          cp frontend/pubspec.yaml new_app/pubspec.yaml
+          cp -r lib/* new_app/lib/
+          cp pubspec.yaml new_app/pubspec.yaml
           
-          # 3. अब new_app फोल्डर में जाएं और अपना काम करें
+          # 3. फाइल्स को सीधे android_templates से new_app के अंदर कॉपी करें
+          # अब हम फोल्डर के अंदर नहीं घुस रहे, इसलिए पाथ एरर नहीं आएगा
+          mkdir -p new_app/android/app/src/main/kotlin/com/jarvis/godmode/
+          cp -f android_templates/AndroidManifest.xml new_app/android/app/src/main/AndroidManifest.xml
+          cp -f android_templates/MainActivity.kt new_app/android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          cp -f android_templates/build.gradle new_app/android/app/build.gradle
+          cp -f android_templates/gradle.properties new_app/gradle.properties
+          
+          # 4. अब new_app में जाकर बिल्ड करें
           cd new_app
-          
-          # 4. अपनी फाइल्स को टेम्पलेट से ओवरराइट करें (जो भी आपने बनाया है)
-          # ध्यान रहे: पाथ अब बदल गया है क्योंकि हम 'new_app' के अंदर हैं
-          mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
-          cp -f ../android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          cp -f ../android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          cp -f ../android_templates/build.gradle android/app/build.gradle
-          cp -f ../android_templates/gradle.properties android/gradle.properties
-          
-          # 5. बिल्ड करें
           flutter pub get
           flutter build apk --release
 
@@ -41,5 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Jarvis-GodMode-APK
-          path: new_app/build/app/outputs/flutter-apk/app-release.apk
-          
+          path: frontend/new_app/build/app/outputs/flutter-apk/app-release.apk
