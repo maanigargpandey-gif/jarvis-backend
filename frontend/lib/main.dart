@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/jarvis_state_provider.dart';
-import 'screens/jarvis_main_screen.dart';
-import 'screens/login_screen.dart';
+import 'auth_gate.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [
@@ -22,27 +20,9 @@ class JarvisApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'JARVIS OS',
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.system,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
-        primaryColor: Colors.black,
-        fontFamily: 'Roboto',
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
-        primaryColor: Colors.white,
-        fontFamily: 'Roboto',
-      ),
-      // यहाँ 'गेटकीपर' (AuthGate) काम कर रहा है
-      home: Consumer<JarvisStateProvider>(
-        builder: (context, auth, _) {
-          return auth.isLoggedIn ? const JarvisMainScreen() : const LoginScreen();
-        },
-      ),
+      theme: ThemeData.dark(), // डार्क मोड 'God Mode' के लिए बेस्ट है
+      home: const AuthGate(),
     );
   }
 }
