@@ -1,43 +1,26 @@
-name: Build Jarvis APK
-on: [push]
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Java & Flutter
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
         with:
-          channel: 'stable'
-
-      - name: Force Clean and Build
-        run: |
-          cd frontend
-          
-          # 1. कचरा हटाना (sudo का इस्तेमाल करके ताकि परमिशन का रोना न हो)
-          echo "Forcing deletion of existing android folder..."
-          sudo rm -rf android
-          sudo rm -rf .gradle
-          
-          # 2. नया प्रोजेक्ट बनाना
-          echo "Creating new project structure..."
-          flutter create .
-          
-          # 3. आपकी टेम्प्लेट फाइलें डालना
-          mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
-          cp -f android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          cp -f android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          cp -f android_templates/build.gradle android/app/build.gradle
-          cp -f android_templates/gradle.properties android/gradle.properties
-          
-          # 4. बिल्ड
-          flutter pub get
-          flutter build apk --release
-
+          distribution: 'zulu'
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+      - run: flutter pub get
+      - run: flutter build apk --release
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: Jarvis-GodMode-APK
-          path: frontend/build/app/outputs/flutter-apk/app-release.apk
+          name: jarvis-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           
