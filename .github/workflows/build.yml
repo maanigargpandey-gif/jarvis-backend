@@ -11,22 +11,10 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK (Fresh Gradle Fix)
+      - name: Build APK
         run: |
           cd frontend
-          
-          # 1. पुराना करप्ट एंड्रॉइड फोल्डर उड़ाओ
-          rm -rf android
-          
-          # 2. नया, फ्रेश एंड्रॉइड प्रोजेक्ट जनरेट करो (यह v2 embedding के साथ आएगा)
-          flutter create --platforms=android .
-          
-          # 3. अब अपनी परमिशंस फाइलें (जो तुमने रिपो में रखी हैं) वापस इंजेक्ट करो
-          # (सुनिश्चित करें कि Manifest और MainActivity फाइलें आपके 'frontend' फोल्डर के अंदर हैं)
-          cp ../AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          cp ../MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          
-          # 4. अब बिल्ड करो
+          # फाइलें पहले से 'frontend/android/...' में मौजूद हैं, इसलिए कोई cp या rm की जरूरत नहीं है
           flutter pub get
           flutter build apk --release
 
