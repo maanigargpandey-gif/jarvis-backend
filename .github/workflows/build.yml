@@ -4,6 +4,8 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
       - name: Setup Java & Flutter
@@ -15,21 +17,22 @@ jobs:
         run: |
           cd frontend
           
-          # 1. पुराना सब कुछ उड़ाओ ताकि कोई कन्फ्यूजन न हो
+          # 1. क्लीन स्लेट
           rm -rf android
+          rm -rf .gradle
+          rm -f local.properties
           
-          # 2. नया एंड्रॉइड फोल्डर बनाओ
-          flutter create --platforms=android .
+          # 2. नया प्रोजेक्ट
+          flutter create .
           
-          # 3. फाइलों को सीधे ओवरराइट करो (कोई sed नहीं, कोई एडिटिंग नहीं)
-          # हम अपने टेम्पलेट्स को सीधे नई फाइलों के ऊपर कॉपी कर रहे हैं
+          # 3. फाइल्स ओवरराइट
           mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
-          cp android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          cp android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
-          cp android_templates/build.gradle android/app/build.gradle
-          cp android_templates/gradle.properties android/gradle.properties
+          cp -f android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          cp -f android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          cp -f android_templates/build.gradle android/app/build.gradle
+          cp -f android_templates/gradle.properties android/gradle.properties
           
-          # 4. बिल्ड करो
+          # 4. बिल्ड
           flutter pub get
           flutter build apk --release
 
