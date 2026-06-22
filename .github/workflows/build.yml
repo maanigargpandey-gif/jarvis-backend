@@ -13,20 +13,15 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK (Corrected Paths)
+      - name: Build APK (Final Fix)
         run: |
           cd frontend
           
-          # 1. पुराना सब कचरा साफ़ करें
-          rm -rf android
-          rm -rf .gradle
-          rm -f local.properties
-          
-          # 2. नया प्रोजेक्ट बनाएं
+          # 1. नया प्रोजेक्ट स्ट्रक्चर बनाएं (चूंकि एंड्रॉइड फोल्डर नहीं है, यह काम करेगा)
           flutter create .
           
-          # 3. फाइलें कॉपी करें (पाथ फिक्स: अब ../ नहीं है)
-          # अब स्क्रिप्ट आपके 'frontend' फोल्डर के अंदर से ही फाइलें उठाएगी
+          # 2. अब फाइलें 'android_templates' से उठाकर एंड्रॉइड फोल्डर में डालें
+          # पाथ को फिक्स कर दिया है: अब ../ का इस्तेमाल नहीं है
           mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
           
           cp -f android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
@@ -34,7 +29,7 @@ jobs:
           cp -f android_templates/build.gradle android/app/build.gradle
           cp -f android_templates/gradle.properties android/gradle.properties
           
-          # 4. बिल्ड चलाएं
+          # 3. बिल्ड करें
           flutter pub get
           flutter build apk --release
 
