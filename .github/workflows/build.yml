@@ -13,12 +13,16 @@ jobs:
       
       - name: Build APK
         run: |
-          cd frontend
-          # अब कोई डिलीट या क्रिएट का झमेला नहीं है, सिर्फ कॉपी करेंगे
-          cp ../android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
-          mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
-          cp ../android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          # 1. सबसे पहले फोल्डर बनाओ (अगर नहीं है तो)
+          mkdir -p frontend/android/app/src/main/kotlin/com/jarvis/godmode/
           
+          # 2. फाइल्स को यहाँ से वहां कॉपी करो (बिना किसी cd के पंगे के)
+          # अब हम रूट (Root) से कॉपी कर रहे हैं, जो सबसे सेफ तरीका है
+          cp android_templates/AndroidManifest.xml frontend/android/app/src/main/AndroidManifest.xml
+          cp android_templates/MainActivity.kt frontend/android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          
+          # 3. अब बिल्ड शुरू करो
+          cd frontend
           flutter pub get
           flutter build apk --release
 
