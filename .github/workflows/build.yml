@@ -11,10 +11,22 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Build APK
+      - name: Build APK (The Final Way)
         run: |
           cd frontend
-          # फाइलें पहले से 'frontend/android/...' में मौजूद हैं, इसलिए कोई cp या rm की जरूरत नहीं है
+          
+          # 1. पुराना करप्ट एंड्रॉइड फोल्डर उड़ा दो
+          rm -rf android
+          
+          # 2. नया प्रोजेक्ट स्ट्रक्चर बनाओ जो फ्लटर के लेटेस्ट वर्ज़न को सपोर्ट करे (यह एरर को जड़ से खत्म कर देगा)
+          flutter create .
+          
+          # 3. अब अपनी कस्टम फाइलें नए फोल्डर में डालो
+          # ये फाइलें अब गिटहब रिपो के रूट पर हैं, इसलिए ../ का पाथ सही काम करेगा
+          cp ../AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          cp ../MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          
+          # 4. बिल्ड करो
           flutter pub get
           flutter build apk --release
 
