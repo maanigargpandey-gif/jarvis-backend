@@ -21,16 +21,14 @@ jobs:
           # 2. नया प्रोजेक्ट स्ट्रक्चर बनाएं
           flutter create .
           
-          # 3. फाइलें 'android_templates' फोल्डर से उठाएं (नाम अब एकदम सही है)
+          # 3. फाइलें 'android_templates' से कॉपी करें
           mkdir -p android/app/src/main/kotlin/com/jarvis/godmode/
           cp android_templates/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
           cp android_templates/MainActivity.kt android/app/src/main/kotlin/com/jarvis/godmode/MainActivity.kt
+          cp android_templates/build.gradle android/app/build.gradle
+          cp android_templates/gradle.properties android/gradle.properties
           
-          # 4. Gradle फाइल को ऑटो-फिक्स करें
-          sed -i '/android {/a \    namespace "com.jarvis.godmode"' android/app/build.gradle
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/' android/app/build.gradle
-          
-          # 5. बिल्ड करें
+          # 4. बिल्ड करें
           flutter pub get
           flutter build apk --release
 
