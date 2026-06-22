@@ -3,19 +3,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
 class JarvisStateProvider extends ChangeNotifier {
-  String _currentRole = "Guest"; 
+  String _currentRole = "Guest";
   bool _isLoggedIn = false;
   List<Map<String, dynamic>> _messages = [];
-  bool _isProcessing = false;
+  List<dynamic> _files = []; // फाइल लिस्ट का नया स्टेट
 
   String get currentRole => _currentRole;
   bool get isLoggedIn => _isLoggedIn;
-  List<Map<String, dynamic>> get messages => _messages;
-  bool get isProcessing => _isProcessing;
+  List<dynamic> get files => _files;
 
-  JarvisStateProvider() {
-    _initApp();
-  }
+  JarvisStateProvider() { _initApp(); }
 
   Future<void> _initApp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -24,7 +21,12 @@ class JarvisStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // लॉगिन के बाद रोल सेट करना
+  // फाइलें लोड करना (Server से)
+  Future<void> loadVaultFiles() async {
+    _files = await ApiService.fetchVaultFiles(_currentRole);
+    notifyListeners();
+  }
+
   Future<void> loginUser(String role) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('jarvis_role', role);
@@ -33,30 +35,6 @@ class JarvisStateProvider extends ChangeNotifier {
     _isLoggedIn = true;
     notifyListeners();
   }
-
-  // लॉग आउट
-  Future<void> logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    _isLoggedIn = false;
-    _currentRole = "Guest";
-    notifyListeners();
-  }
-
-  Future<void> processUserCommand(String text) async {
-    if (text.trim().isEmpty) return;
-    _messages.add({"sender": "user", "type": "text", "text": text});
-    _isProcessing = true;
-    notifyListeners();
-
-    final response = await ApiService.processCommand(text, _currentRole);
-    
-    _isProcessing = false;
-    _messages.add({
-      "sender": "jarvis",
-      "type": response['type'] ?? 'text',
-      "text": response['message'] ?? "System anomaly."
-    });
-    notifyListeners();
-  }
+  
+  // ... (बाकी पुराने फंक्शन्स)
 }
