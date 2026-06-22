@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'providers/jarvis_state_provider.dart';
 import 'auth_gate.dart';
 
-void main() {
+void main() async {
+  // Hive और Flutter दोनों को इनिशियलाइज करो
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('jarvis_data'); // यहाँ हमारा सारा डेटा सेव रहेगा
+
   runApp(
     MultiProvider(
       providers: [
@@ -22,22 +27,7 @@ class JarvisApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'JARVIS OS',
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
-        primaryColor: Colors.black,
-        fontFamily: 'Roboto',
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
-        primaryColor: Colors.white,
-        fontFamily: 'Roboto',
-      ),
-      themeMode: ThemeMode.system,
-      // यह हमारे 11 स्टेप्स का 'मेन गेट' है। 
-      // यह चेक करेगा कि यूजर ने Voice -> Face -> Biometric लेयर पार की है या नहीं।
+      theme: ThemeData.dark(),
       home: const AuthGate(),
     );
   }
