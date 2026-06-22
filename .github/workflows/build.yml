@@ -14,7 +14,6 @@ jobs:
       - name: Build APK
         run: |
           cd frontend
-          # अब हमें कॉपी करने की ज़रूरत नहीं है क्योंकि हमने फाइलें सही जगह डाल दी हैं
           flutter pub get
           flutter build apk --release
 
