@@ -1,0 +1,16 @@
+workflows:
+  default-workflow:
+    name: Android Build
+    working_directory: frontend
+    environment:
+      flutter: stable
+      vars:
+        JARVIS_AUTH_TOKEN: "mani_jarvis_admin_786"
+    scripts:
+      - name: Install dependencies
+        script: flutter pub get
+      - name: Build APK
+        script: flutter build apk --release
+    artifacts:
+      - frontend/build/app/outputs/flutter-apk/app-release.apk
+      
