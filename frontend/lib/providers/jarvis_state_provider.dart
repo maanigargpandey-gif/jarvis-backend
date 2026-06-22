@@ -3,15 +3,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
 class JarvisStateProvider extends ChangeNotifier {
-  // 1. Core State
-  String _currentRole = "Guest"; // डिफ़ॉल्ट Guest
-  bool _isLoggedIn = false;      // क्या यूजर लॉग इन है?
+  String _currentRole = "Guest"; 
+  bool _isLoggedIn = false;
   List<Map<String, dynamic>> _messages = [];
+  bool _isProcessing = false;
 
-  // Getters
   String get currentRole => _currentRole;
   bool get isLoggedIn => _isLoggedIn;
   List<Map<String, dynamic>> get messages => _messages;
+  bool get isProcessing => _isProcessing;
 
   JarvisStateProvider() {
     _initApp();
@@ -24,7 +24,7 @@ class JarvisStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // लॉगिन के बाद रोल सेट करने का फंक्शन
+  // लॉगिन के बाद रोल सेट करना
   Future<void> loginUser(String role) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('jarvis_role', role);
@@ -34,7 +34,7 @@ class JarvisStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // लॉग आउट करने का फंक्शन (आगे काम आएगा)
+  // लॉग आउट
   Future<void> logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -43,5 +43,20 @@ class JarvisStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ... (आपका बाकी पुराना processUserCommand लॉजिक यहाँ रहेगा)
+  Future<void> processUserCommand(String text) async {
+    if (text.trim().isEmpty) return;
+    _messages.add({"sender": "user", "type": "text", "text": text});
+    _isProcessing = true;
+    notifyListeners();
+
+    final response = await ApiService.processCommand(text, _currentRole);
+    
+    _isProcessing = false;
+    _messages.add({
+      "sender": "jarvis",
+      "type": response['type'] ?? 'text',
+      "text": response['message'] ?? "System anomaly."
+    });
+    notifyListeners();
+  }
 }
