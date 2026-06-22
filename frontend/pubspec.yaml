@@ -1,5 +1,5 @@
-name: jarvis_app
-description: A new Flutter project.
+name: jarvis_frontend
+description: "Jarvis AI Project"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,18 +10,17 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  permission_handler: ^11.0.1
   http: ^1.1.0
-  shared_preferences: ^2.2.0
-  permission_handler: ^12.0.3
-  permission_handler_android: ^13.0.1
-  provider: ^6.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
-    
+  # अगर आपको इमेज यूज़ करनी है, तो इसे uncomment करें, वरना इसे हटा दें:
+  # assets:
+  #   - assets/images/
+  
