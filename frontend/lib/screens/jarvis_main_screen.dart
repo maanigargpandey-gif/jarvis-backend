@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart'; 
+import 'package:permission_handler/permission_handler.dart';
 
 class JarvisMainScreen extends StatefulWidget {
   const JarvisMainScreen({super.key});
@@ -15,15 +15,17 @@ class _JarvisMainScreenState extends State<JarvisMainScreen> {
   @override
   void initState() {
     super.initState();
-    _requestPermissions(); 
+    _requestPermissions();
   }
 
-  // इंटरनेट वाली लाइन हटा दी है, क्योंकि वो कोड में नहीं मांगते!
   Future<void> _requestPermissions() async {
     await [
       Permission.microphone,
       Permission.camera,
       Permission.storage,
+      Permission.location,
+      Permission.locationAlways,
+      Permission.manageExternalStorage,
     ].request();
   }
 
