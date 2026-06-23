@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # यहाँ से हम बताते हैं कि पूरा काम 'frontend' फोल्डर के अंदर करना है
     defaults:
       run:
         working-directory: frontend
@@ -25,18 +24,18 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.22.0'
+          channel: 'stable'
 
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi --no-daemon
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: jarvis-apk
-          # Path को भी 'frontend' के हिसाब से एडजस्ट किया
           path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
