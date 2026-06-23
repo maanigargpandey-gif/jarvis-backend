@@ -12,13 +12,25 @@ class UnifiedEditorScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(provider.viewMode == ViewMode.creator ? "CREATOR MODE: ACTIVE" : "JARVIS OS"),
+        title: Text(provider.viewMode == ViewMode.creator ? "CREATOR MODE" : "JARVIS OS"),
         actions: [
-          // यह बटन सिर्फ तभी दिखेगा जब AuthService क्रिएटर को पहचान लेगा
           if (provider.isCreator)
-            IconButton(
-              icon: Icon(provider.viewMode == ViewMode.creator ? Icons.smart_toy : Icons.admin_panel_settings),
-              onPressed: () => provider.toggleViewMode(),
+            Stack(
+              children: [
+                IconButton(
+                  icon: Icon(provider.viewMode == ViewMode.creator ? Icons.smart_toy : Icons.admin_panel_settings),
+                  onPressed: () => provider.toggleViewMode(),
+                ),
+                // स्टेप 17: Notification Indicator
+                if (provider.notificationMessage != null)
+                  Positioned(
+                    right: 8, top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    ),
+                  ),
+              ],
             )
         ],
       ),
@@ -31,12 +43,7 @@ class UnifiedEditorScreen extends StatelessWidget {
   Widget _buildStandardUserInterface(JarvisStateProvider provider) {
     return Stack(
       children: [
-        Row(
-          children: [
-            Container(width: 280, color: Colors.black87, child: _buildSidebar(provider)),
-            Expanded(child: Center(child: Text(provider.aiOutput, style: const TextStyle(color: Colors.white)))),
-          ],
-        ),
+        Center(child: Text(provider.aiOutput, style: const TextStyle(color: Colors.white))),
         const AiAssistantOverlay(),
       ],
     );
@@ -47,42 +54,18 @@ class UnifiedEditorScreen extends StatelessWidget {
       color: Colors.black,
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Text("CREATOR EVOLUTION DASHBOARD", style: TextStyle(color: Colors.greenAccent, fontSize: 22, fontWeight: FontWeight.bold)),
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.code, color: Colors.white),
-                  title: const Text("EVOLVE SYSTEM (PUSH PATCH)", style: TextStyle(color: Colors.white)),
-                  onTap: () => provider.triggerEvolution('{"update": "system_patch_01"}'),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings, color: Colors.white),
-                  title: const Text("SYSTEM STABILITY AUDIT", style: TextStyle(color: Colors.white)),
-                ),
-              ],
+          if (provider.notificationMessage != null)
+            Container(
+              color: Colors.amber.withOpacity(0.2),
+              padding: const EdgeInsets.all(16),
+              child: Text("ALERT: ${provider.notificationMessage}", style: const TextStyle(color: Colors.amber)),
             ),
+          ListTile(
+            title: const Text("EVOLVE SYSTEM", style: TextStyle(color: Colors.white)),
+            onTap: () => provider.triggerEvolution('{"update": "system_patch_01"}'),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSidebar(JarvisStateProvider provider) {
-    return ListView(
-      children: [
-        ExpansionTile(
-          initiallyExpanded: true,
-          title: const Text("TOOLS", style: TextStyle(color: Colors.white)),
-          children: ActiveTool.values.map((tool) => ListTile(
-            title: Text(tool.name.toUpperCase(), style: const TextStyle(color: Colors.white70)),
-            onTap: () => provider.setActiveTool(tool),
-          )).toList(),
-        ),
-      ],
     );
   }
 }
