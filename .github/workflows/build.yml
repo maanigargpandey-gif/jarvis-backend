@@ -1,24 +1,35 @@
-name: Build APK
+name: Jarvis OS Build Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
-      - uses: subosito/flutter-action@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x'
-      - run: flutter pub get
-      - run: flutter build apk --release
-      - name: Upload APK
+          flutter-version: '3.22.0' # स्टेबल वर्जन सेट किया है
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: jarvis-apk
