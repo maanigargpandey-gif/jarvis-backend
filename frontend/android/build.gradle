@@ -1,33 +1,33 @@
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin"
-}
+// File: frontend/android/build.gradle
 
-android {
-    namespace "com.jarvis.godmode"
-    compileSdkVersion flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
-
-    defaultConfig {
-        applicationId "com.jarvis.godmode"
-        minSdkVersion 21
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+buildscript {
+    ext.kotlin_version = '1.8.22' // या अपने प्रोजेक्ट का वर्जन
+    repositories {
+        google()
+        mavenCentral()
     }
-
-    buildTypes {
-        release {
-            // ये है असली ऑप्टिमाइजेशन - ऐप का साइज छोटा करेगा
-            minifyEnabled true 
-            shrinkResources true 
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
-        }
+    dependencies {
+        // यह वो लाइन है जो 'com.android.application' प्लगइन ढूंढती है
+        classpath 'com.android.tools.build:gradle:7.3.0' 
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
-flutter {
-    source '../..'
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.build.dir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.build.dir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
 }
