@@ -2,17 +2,23 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class JarvisBackgroundService {
-  // यह क्लास बैकग्राउंड में म्यूजिक, डेटा सिंक और नोटिफिकेशन संभालेगी
-  static void startBackgroundTask() {
-    print("Jarvis System: Background Orchestrator Started...");
-    Timer.periodic(const Duration(seconds: 30), (timer) {
-      // यहाँ वो लॉजिक होगा जो हर 30 सेकंड में सर्वर से डेटा सिंक करेगा
-      // जैसे: 'check_notifications' or 'refresh_cache'
-      debugPrint("Jarvis OS: Background Syncing System State...");
+  // यह बैकग्राउंड में चलते हुए इकोसिस्टम को स्कैन करेगा
+  static void startBackgroundTask(Function onUpdateFound) {
+    Timer.periodic(const Duration(minutes: 5), (timer) async {
+      debugPrint("Jarvis Scanner: Checking for Ecosystem Upgrades...");
+      
+      // यहाँ हम सर्वर से चेक करेंगे कि क्या कोई नया 'पैच' है
+      bool hasUpdate = await _checkForUpgrades(); 
+      
+      if (hasUpdate) {
+        onUpdateFound("New Evolution Patch Available!");
+      }
     });
   }
 
-  static void stopBackgroundTask() {
-    print("Jarvis System: Background Orchestrator Stopped.");
+  static Future<bool> _checkForUpgrades() async {
+    // यहाँ API कॉल होगा जो चेक करेगा कि क्या कोई नया फीचर आया है
+    // अभी के लिए इसे 'false' रखा है, बैकएंड कनेक्ट होते ही यह ट्रू हो जाएगा
+    return false; 
   }
 }
