@@ -18,43 +18,33 @@ class UnifiedEditorScreen extends StatelessWidget {
             IconButton(
               icon: Icon(provider.viewMode == ViewMode.creator ? Icons.smart_toy : Icons.admin_panel_settings),
               onPressed: () => provider.toggleViewMode(),
-            )
-        ],
-      ),
-      body: Column(
-        children: [
-          // स्टेप 19: प्रोएक्टिव सजेशन बार
-          if (provider.proactiveSuggestion != null)
-            Container(
-              color: Colors.blueAccent.withOpacity(0.3),
-              padding: const EdgeInsets.all(10),
-              child: Text("JARVIS SUGGESTS: ${provider.proactiveSuggestion}", style: const TextStyle(color: Colors.white)),
             ),
-          Expanded(
-            child: provider.viewMode == ViewMode.creator 
-                ? _buildCreatorDashboard(provider) 
-                : _buildStandardUserInterface(provider),
-          ),
+        ],
+      ),
+      // Stack का इस्तेमाल किया है ताकि Overlay ऊपर आ सके
+      body: Stack(
+        children: [
+          // मेन कंटेंट
+          provider.viewMode == ViewMode.creator 
+              ? _buildCreatorDashboard(provider) 
+              : _buildStandardUserInterface(provider),
+          
+          // AI Assistant Overlay यहाँ फिक्स्ड है
+          const AiAssistantOverlay(),
         ],
       ),
     );
   }
 
-  Widget _buildStandardUserInterface(JarvisStateProvider provider) {
-    return Stack(
-      children: [
-        Center(child: Text(provider.aiOutput, style: const TextStyle(color: Colors.white))),
-        const AiAssistantOverlay(),
-      ],
-    );
+  Widget _buildStandardUserInterface(Provider) {
+    return const Center(child: Text("Main OS Interface", style: TextStyle(color: Colors.white)));
   }
 
-  Widget _buildCreatorDashboard(JarvisStateProvider provider) {
+  Widget _buildCreatorDashboard(provider) {
     return Container(
       color: Colors.black,
       child: ListView(
         children: [
-          const Padding(padding: EdgeInsets.all(20), child: Text("CREATOR EVOLUTION DASHBOARD", style: TextStyle(color: Colors.greenAccent))),
           ListTile(
             title: const Text("EVOLVE SYSTEM", style: TextStyle(color: Colors.white)),
             onTap: () => provider.triggerEvolution('{"update": "system_patch_01"}'),
