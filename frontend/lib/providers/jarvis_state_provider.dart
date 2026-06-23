@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../services/api_service.dart';
 import '../services/music_service.dart';
 import '../services/evolution_engine.dart';
 import '../services/auth_service.dart';
+import '../services/background_service.dart';
 
 enum ActiveTool { none, word, excel, ppt, pdf, video, photo, browser, music, geo, evolution }
 enum ViewMode { user, creator }
@@ -16,14 +18,14 @@ class JarvisStateProvider extends ChangeNotifier {
   bool _isFullyAuthenticated = false;
   bool _isCreator = false;
   ViewMode _viewMode = ViewMode.user;
-  ActiveTool _activeTool = ActiveTool.none;
-  String _aiOutput = "System Online.";
+  String _aiOutput = "System Synced.";
+  String? _notificationMessage; // ये वो नोटिफिकेशन है जो जार्विस देगा
 
   bool get isFullyAuthenticated => _isFullyAuthenticated;
   bool get isCreator => _isCreator;
   ViewMode get viewMode => _viewMode;
-  ActiveTool get activeTool => _activeTool;
   String get aiOutput => _aiOutput;
+  String? get notificationMessage => _notificationMessage;
 
   JarvisStateProvider() {
     _initSystem();
@@ -34,8 +36,15 @@ class JarvisStateProvider extends ChangeNotifier {
     String savedEmail = _box.get('email', defaultValue: "");
     String savedPhone = _box.get('phone', defaultValue: "");
     
-    // यहाँ AuthService से क्रिएटर स्टेटस कंफर्म हो रहा है
     _isCreator = AuthService.isCreator(savedEmail, savedPhone);
+    
+    // स्टेप 17: बैकग्राउंड स्कैनर शुरू करना
+    if (_isFullyAuthenticated) {
+      JarvisBackgroundService.startBackgroundTask((msg) {
+        _notificationMessage = msg;
+        notifyListeners();
+      });
+    }
     notifyListeners();
   }
 
@@ -43,7 +52,6 @@ class JarvisStateProvider extends ChangeNotifier {
     _box.put('auth', true);
     _box.put('email', email);
     _box.put('phone', phone);
-    
     _isCreator = AuthService.isCreator(email, phone);
     _isFullyAuthenticated = true;
     notifyListeners();
@@ -56,24 +64,11 @@ class JarvisStateProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> executeNeuralCommand(String command) async {
-    _aiOutput = "Processing...";
-    notifyListeners();
-    await for (final chunk in ApiService.streamAiResponse(command, "mani_jarvis_admin_786")) {
-      _aiOutput = chunk;
-      notifyListeners();
-    }
-  }
-
-  void setActiveTool(ActiveTool tool) {
-    _activeTool = tool;
-    notifyListeners();
-  }
-
   Future<void> triggerEvolution(String patchData) async {
     if (_isCreator) {
       await _evolutionEngine.applyPatch(patchData);
-      _aiOutput = "System Evolved.";
+      _notificationMessage = null; // नोटिफिकेशन क्लियर करना
+      _aiOutput = "System Evolution Complete.";
       notifyListeners();
     }
   }
