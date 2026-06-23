@@ -7,13 +7,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # यहाँ से हम बताते हैं कि पूरा काम 'frontend' फोल्डर के अंदर करना है
+    defaults:
+      run:
+        working-directory: frontend
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4 # 2026 Standard
+        uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v4 # Upgraded to v4
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -21,7 +25,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0' # Updated for 2026 stability
+          flutter-version: '3.24.0'
 
       - name: Install Dependencies
         run: flutter pub get
@@ -30,8 +34,9 @@ jobs:
         run: flutter build apk --release --split-per-abi
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4 # Crucial: Must be v4
+        uses: actions/upload-artifact@v4
         with:
           name: jarvis-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          # Path को भी 'frontend' के हिसाब से एडजस्ट किया
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
