@@ -11,6 +11,9 @@ class JarvisStateProvider extends ChangeNotifier {
   bool get isCreator => _isCreator;
   String get aiOutput => _aiOutput;
 
+  // ये वो नए मेथड्स हैं जिनकी वजह से बिल्ड फेल हो रहा था
+  bool get isFullyAuthenticated => _box.get('auth', defaultValue: false);
+
   JarvisStateProvider() {
     _initIdentity();
   }
@@ -21,8 +24,16 @@ class JarvisStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // लॉगिन यूजर का मेथड
+  Future<void> loginUser(String email) async {
+    await _box.put('auth', true);
+    await _box.put('email', email);
+    _isCreator = (email == AuthService.masterEmail);
+    notifyListeners();
+  }
+
   void updateAiOutput(String message) {
     _aiOutput = message;
-    notifyListeners(); // यही वह पॉइंट है जो Overlay को रियल-टाइम अपडेट करेगा
+    notifyListeners(); // यहीं वह बूट है जो Overlay को रियल-टाइम अपडेट करेगा
   }
 }
