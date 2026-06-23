@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   hive: ^2.2.3
-    hive_flutter: ^1.1.0
+  hive_flutter: ^1.1.0
   provider: ^6.1.1
   shared_preferences: ^2.2.3
 
@@ -21,6 +21,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # नोट: सभी एसेट लाइन्स हटा दी गई हैं क्योंकि फाइलें अभी मौजूद नहीं हैं।
-  # जब तुम इमेज फोल्डर बना लोगे, तब हम उन्हें वापस जोड़ेंगे।
   
