@@ -12,31 +12,31 @@ class UnifiedEditorScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(provider.viewMode == ViewMode.creator ? "CREATOR MODE" : "JARVIS OS"),
+        title: Text(provider.viewMode == ViewMode.creator ? "CREATOR MODE: ACTIVE" : "JARVIS OS"),
         actions: [
           if (provider.isCreator)
-            Stack(
-              children: [
-                IconButton(
-                  icon: Icon(provider.viewMode == ViewMode.creator ? Icons.smart_toy : Icons.admin_panel_settings),
-                  onPressed: () => provider.toggleViewMode(),
-                ),
-                // स्टेप 17: Notification Indicator
-                if (provider.notificationMessage != null)
-                  Positioned(
-                    right: 8, top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                    ),
-                  ),
-              ],
+            IconButton(
+              icon: Icon(provider.viewMode == ViewMode.creator ? Icons.smart_toy : Icons.admin_panel_settings),
+              onPressed: () => provider.toggleViewMode(),
             )
         ],
       ),
-      body: provider.viewMode == ViewMode.creator 
-          ? _buildCreatorDashboard(provider) 
-          : _buildStandardUserInterface(provider),
+      body: Column(
+        children: [
+          // स्टेप 19: प्रोएक्टिव सजेशन बार
+          if (provider.proactiveSuggestion != null)
+            Container(
+              color: Colors.blueAccent.withOpacity(0.3),
+              padding: const EdgeInsets.all(10),
+              child: Text("JARVIS SUGGESTS: ${provider.proactiveSuggestion}", style: const TextStyle(color: Colors.white)),
+            ),
+          Expanded(
+            child: provider.viewMode == ViewMode.creator 
+                ? _buildCreatorDashboard(provider) 
+                : _buildStandardUserInterface(provider),
+          ),
+        ],
+      ),
     );
   }
 
@@ -52,14 +52,9 @@ class UnifiedEditorScreen extends StatelessWidget {
   Widget _buildCreatorDashboard(JarvisStateProvider provider) {
     return Container(
       color: Colors.black,
-      child: Column(
+      child: ListView(
         children: [
-          if (provider.notificationMessage != null)
-            Container(
-              color: Colors.amber.withOpacity(0.2),
-              padding: const EdgeInsets.all(16),
-              child: Text("ALERT: ${provider.notificationMessage}", style: const TextStyle(color: Colors.amber)),
-            ),
+          const Padding(padding: EdgeInsets.all(20), child: Text("CREATOR EVOLUTION DASHBOARD", style: TextStyle(color: Colors.greenAccent))),
           ListTile(
             title: const Text("EVOLVE SYSTEM", style: TextStyle(color: Colors.white)),
             onTap: () => provider.triggerEvolution('{"update": "system_patch_01"}'),
