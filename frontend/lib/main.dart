@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'providers/jarvis_state_provider.dart';
-import 'auth_gate.dart';
+import 'gateways/auth_gate.dart';
 
 void main() async {
-  // Hive और Flutter दोनों को इनिशियलाइज करो
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  await Hive.openBox('jarvis_data'); // यहाँ हमारा सारा डेटा सेव रहेगा
-
+  await Hive.openBox('jarvis_data');
+  
   runApp(
     MultiProvider(
       providers: [
@@ -27,8 +26,9 @@ class JarvisApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Jarvis OS',
       theme: ThemeData.dark(),
-      home: const AuthGate(),
+      home: const AuthGate(), // सीधा AuthGate पर ले जाएगा
     );
   }
 }
