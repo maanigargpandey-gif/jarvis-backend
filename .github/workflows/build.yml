@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # 2026 Standard
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4 # Upgraded to v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -21,7 +21,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0' # स्टेबल वर्जन सेट किया है
+          flutter-version: '3.24.0' # Updated for 2026 stability
 
       - name: Install Dependencies
         run: flutter pub get
@@ -30,7 +30,7 @@ jobs:
         run: flutter build apk --release --split-per-abi
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # Crucial: Must be v4
         with:
           name: jarvis-apk
           path: build/app/outputs/flutter-apk/app-release.apk
