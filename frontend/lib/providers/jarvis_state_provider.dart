@@ -7,7 +7,8 @@ import '../services/evolution_engine.dart';
 import '../services/auth_service.dart';
 import '../services/background_service.dart';
 import '../services/neural_diagnostics.dart';
-import '../services/context_engine.dart'; // स्टेप 19 का नया मॉड्यूल
+import '../services/context_engine.dart';
+import '../utils/app_hardener.dart';
 
 enum ActiveTool { none, word, excel, ppt, pdf, video, photo, browser, music, geo, evolution }
 enum ViewMode { user, creator }
@@ -16,14 +17,14 @@ class JarvisStateProvider extends ChangeNotifier {
   final _box = Hive.box('jarvis_data');
   final MusicService _musicService = MusicService();
   final EvolutionEngine _evolutionEngine = EvolutionEngine();
-  final ContextEngine _contextEngine = ContextEngine(); // स्टेप 19 का इंजन
+  final ContextEngine _contextEngine = ContextEngine();
 
   bool _isFullyAuthenticated = false;
   bool _isCreator = false;
   ViewMode _viewMode = ViewMode.user;
-  String _aiOutput = "System Synced.";
+  String _aiOutput = "System Hardened & Ready.";
   String? _notificationMessage;
-  String? _proactiveSuggestion; // जार्विस का सुझाव
+  String? _proactiveSuggestion;
 
   bool get isFullyAuthenticated => _isFullyAuthenticated;
   bool get isCreator => _isCreator;
@@ -32,20 +33,31 @@ class JarvisStateProvider extends ChangeNotifier {
   String? get notificationMessage => _notificationMessage;
   String? get proactiveSuggestion => _proactiveSuggestion;
 
-  JarvisStateProvider() { _initSystem(); }
+  JarvisStateProvider() {
+    AppHardener.lockSystemIntegrity();
+    _initSystem();
+  }
 
   void _initSystem() {
     _isFullyAuthenticated = _box.get('auth', defaultValue: false);
     String savedEmail = _box.get('email', defaultValue: "");
     String savedPhone = _box.get('phone', defaultValue: "");
     _isCreator = AuthService.isCreator(savedEmail, savedPhone);
+    
+    if (_isFullyAuthenticated) {
+      JarvisBackgroundService.startBackgroundTask((msg) {
+        _notificationMessage = msg;
+        notifyListeners();
+      });
+    }
     notifyListeners();
   }
 
-  // स्टेप 19: टूल यूज करने पर कॉन्टेक्स्ट को अपडेट करें
+  // --- MASTER COMMAND CENTER ---
+  
   void setActiveTool(ActiveTool tool) {
-    _contextEngine.logAction(tool.name); // पैटर्न रिकॉर्ड करो
-    _proactiveSuggestion = _contextEngine.getProactiveSuggestion(); // सुझाव मांगो
+    _contextEngine.logAction(tool.name);
+    _proactiveSuggestion = _contextEngine.getProactiveSuggestion();
     notifyListeners();
   }
 
@@ -62,6 +74,7 @@ class JarvisStateProvider extends ChangeNotifier {
   Future<void> triggerEvolution(String patchData) async {
     if (_isCreator) {
       await _evolutionEngine.applyPatch(patchData);
+      _notificationMessage = null;
       _aiOutput = "System Evolution Complete.";
       notifyListeners();
     }
