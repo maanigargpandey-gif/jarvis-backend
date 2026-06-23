@@ -31,7 +31,8 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --split-per-abi --no-daemon
+        # यहाँ से हमने --no-daemon हटा दिया है क्योंकि यह फ्लैग यहाँ नहीं चलता
+        run: flutter build apk --release --split-per-abi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
