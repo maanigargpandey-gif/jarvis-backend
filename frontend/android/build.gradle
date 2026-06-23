@@ -1,12 +1,11 @@
 buildscript {
-    ext.kotlin_version = '1.8.22'
+    ext.kotlin_version = '1.9.0'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        // AGP को 7.4.2 पर अपग्रेड किया है ताकि यह Java 17 के साथ मैच करे
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -18,9 +17,9 @@ allprojects {
     }
 }
 
-rootProject.build.dir = '../build'
+rootProject.buildDir = '../build'
 subprojects {
-    project.buildDir = "${rootProject.build.dir}/${project.name}"
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
     project.evaluationDependsOn(':app')
