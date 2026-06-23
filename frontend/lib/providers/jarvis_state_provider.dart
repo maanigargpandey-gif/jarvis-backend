@@ -6,6 +6,7 @@ import '../services/music_service.dart';
 import '../services/evolution_engine.dart';
 import '../services/auth_service.dart';
 import '../services/background_service.dart';
+import '../services/neural_diagnostics.dart'; // स्टेप 18 का नया मॉड्यूल
 
 enum ActiveTool { none, word, excel, ppt, pdf, video, photo, browser, music, geo, evolution }
 enum ViewMode { user, creator }
@@ -19,7 +20,7 @@ class JarvisStateProvider extends ChangeNotifier {
   bool _isCreator = false;
   ViewMode _viewMode = ViewMode.user;
   String _aiOutput = "System Synced.";
-  String? _notificationMessage; // ये वो नोटिफिकेशन है जो जार्विस देगा
+  String? _notificationMessage;
 
   bool get isFullyAuthenticated => _isFullyAuthenticated;
   bool get isCreator => _isCreator;
@@ -38,7 +39,6 @@ class JarvisStateProvider extends ChangeNotifier {
     
     _isCreator = AuthService.isCreator(savedEmail, savedPhone);
     
-    // स्टेप 17: बैकग्राउंड स्कैनर शुरू करना
     if (_isFullyAuthenticated) {
       JarvisBackgroundService.startBackgroundTask((msg) {
         _notificationMessage = msg;
@@ -46,6 +46,36 @@ class JarvisStateProvider extends ChangeNotifier {
       });
     }
     notifyListeners();
+  }
+
+  // स्टेप 18: ऑटोनॉमस एरर फिक्सिंग
+  Future<void> logSystemFailure(String moduleName, String error) async {
+    _aiOutput = "Critical Error in $moduleName. Running Diagnostics...";
+    notifyListeners();
+
+    // एरर का इलाज खोजें
+    String? solution = await NeuralDiagnostics.analyzeError(moduleName, error);
+    
+    if (solution != null) {
+      _aiOutput = "Self-Healing: Applying Neural Patch...";
+      notifyListeners();
+      await _evolutionEngine.applyPatch(solution);
+      _aiOutput = "System Healed Successfully.";
+    } else {
+      // अगर इलाज नहीं मिला, तो क्रिएटर को रिपोर्ट करें
+      _notificationMessage = "DIAGNOSTIC FAILED: $moduleName requires manual patch.";
+    }
+    notifyListeners();
+  }
+
+  // क्रिएटर कमांड
+  Future<void> triggerEvolution(String patchData) async {
+    if (_isCreator) {
+      await _evolutionEngine.applyPatch(patchData);
+      _notificationMessage = null;
+      _aiOutput = "System Evolution Complete.";
+      notifyListeners();
+    }
   }
 
   void login(String email, String phone) {
@@ -60,15 +90,6 @@ class JarvisStateProvider extends ChangeNotifier {
   void toggleViewMode() {
     if (_isCreator) {
       _viewMode = (_viewMode == ViewMode.user) ? ViewMode.creator : ViewMode.user;
-      notifyListeners();
-    }
-  }
-
-  Future<void> triggerEvolution(String patchData) async {
-    if (_isCreator) {
-      await _evolutionEngine.applyPatch(patchData);
-      _notificationMessage = null; // नोटिफिकेशन क्लियर करना
-      _aiOutput = "System Evolution Complete.";
       notifyListeners();
     }
   }
