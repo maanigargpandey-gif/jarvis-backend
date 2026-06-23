@@ -1,14 +1,25 @@
-import os
-from fastapi import Header, HTTPException, Depends
-from dotenv import load_dotenv
+# File: jarvis-backend/auth.py
+from flask import Flask, request, jsonify
 
-load_dotenv()
+app = Flask(__name__)
 
-# अगर .env में पिन न मिले, तो डिफ़ॉल्ट '1234' काम करेगा
-VALID_PIN = os.getenv("X_PIN", "1234")
+# Master Identity (Locked)
+IDENTITY = {
+    "name": "Mani Pandey",
+    "email": "maanigargpandey@gmail.com",
+    "phone": "+91 86041 41005"
+}
+PASSWORD = "1005@Maani"
 
-def verify_pin(x_pin: str = Header(..., alias="x-pin")):
-    if x_pin != VALID_PIN:
-        raise HTTPException(status_code=401, detail="Invalid Security PIN")
-    return x_pin
-  
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    if data.get('email') == IDENTITY['email'] and \
+       data.get('phone') == IDENTITY['phone'] and \
+       data.get('password') == PASSWORD:
+        return jsonify({"status": "success", "token": "TOKEN_MANI_2026"}), 200
+    return jsonify({"status": "error"}), 401
+
+if __name__ == '__main__':
+    app.run(port=5000, host='0.0.0.0')
+    
