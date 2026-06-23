@@ -1,14 +1,14 @@
 // File: frontend/android/build.gradle
 
 buildscript {
-    ext.kotlin_version = '1.8.22' // या अपने प्रोजेक्ट का वर्जन
+    ext.kotlin_version = '1.8.22'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        // यह वो लाइन है जो 'com.android.application' प्लगइन ढूंढती है
-        classpath 'com.android.tools.build:gradle:7.3.0' 
+        // यह स्टैंडर्ड प्लगइन है जो 99% प्रोजेक्ट्स पर काम करता है
+        classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -20,14 +20,5 @@ allprojects {
     }
 }
 
-rootProject.build.dir = '../build'
-subprojects {
-    project.buildDir = "${rootProject.build.dir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(':app')
-}
-
-tasks.register("clean", Delete) {
-    delete rootProject.buildDir
-}
+// हमने वो जटिल लाइन्स हटा दी हैं जो एरर दे रही थीं। 
+// Gradle को अपने डिफ़ॉल्ट बिल्ड फोल्डर का उपयोग करने दो।
