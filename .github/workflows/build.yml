@@ -18,19 +18,16 @@ jobs:
         with:
           flutter-version: '3.22.0'
           
-      - run: flutter pub get
+      - name: Install Packages
+        run: flutter pub get
       
-      # THE MAGIC FIX: Bypass Flutter CLI and use Native Android Gradle
-      - name: Build Fat APK using Native Gradle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease
-          
-      # Upload the APK directly from Android's core output folder
-      - name: Upload Final APK
+      # Official Build Command with -v (Verbose) to catch any hidden lies
+      - name: Build Release APK
+        run: flutter build apk --release -v
+        
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: jarvis-apk
-          path: frontend/android/app/build/outputs/apk/release/*.apk
+          path: frontend/build/app/outputs/flutter-apk/*.apk
           
