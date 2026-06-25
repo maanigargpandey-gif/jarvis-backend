@@ -1,25 +1,19 @@
-# File: jarvis-backend/auth.py
-from flask import Flask, request, jsonify
+# auth.py
+from fastapi import HTTPException, Security
+from fastapi.security import APIKeyHeader
+from modules.identity_core import identity
 
-app = Flask(__name__)
+# Flutter ऐप हर रिक्वेस्ट के हैडर में "X-Creator-Token" भेजेगा
+api_key_header = APIKeyHeader(name="X-Creator-Token", auto_error=False)
 
-# Master Identity (Locked)
-IDENTITY = {
-    "name": "Mani Pandey",
-    "email": "maanigargpandey@gmail.com",
-    "phone": "+91 86041 41005"
-}
-PASSWORD = "1005@Maani"
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    if data.get('email') == IDENTITY['email'] and \
-       data.get('phone') == IDENTITY['phone'] and \
-       data.get('password') == PASSWORD:
-        return jsonify({"status": "success", "token": "TOKEN_MANI_2026"}), 200
-    return jsonify({"status": "error"}), 401
-
-if __name__ == '__main__':
-    app.run(port=5000, host='0.0.0.0')
+def verify_creator(creator_token: str = Security(api_key_header)):
+    if not creator_token:
+        print("⚠️ Authentication Failed: No Token Provided")
+        raise HTTPException(status_code=401, detail="Missing Creator Token")
+        
+    if not identity.verify_access(creator_token):
+        print("⚠️ Unauthorized Access Attempt Blocked!")
+        raise HTTPException(status_code=403, detail="Access Denied. God-Mode Only.")
+        
+    return True
     
