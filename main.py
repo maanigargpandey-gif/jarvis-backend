@@ -1,39 +1,54 @@
-from fastapi import FastAPI
+# main.py
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from core.config import settings
-from api.routes import router as api_router
+from pydantic import BaseModel
+from typing import Optional
 
-# Initialize the God-Mode App
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    description="Backend API for Zarvish OS Frontend Binding"
-)
+# Import the missing modules we just created
+from auth import verify_creator
+from memory import jarvis_memory
+from modules.identity_core import identity
+from services.moa_engine import moa_engine # (यह फाइल पहले से आपके पास है)
 
-# CRITICAL FOR FLUTTER CONNECTION: Enable CORS so your mobile app can talk to the server
+app = FastAPI(title="Zarvish OS Backend", version="4.0.0")
+
+# CORS Setup for Flutter Binding
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific app domains
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows GET, POST, PUT, DELETE etc.
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include all the API endpoints from api/routes.py
-app.include_router(api_router, prefix=settings.API_V1_STR)
+class ChatRequest(BaseModel):
+    query: str
+    workspace_mode: str = "chat"
 
-# Print startup sequence to console
-@app.on_event("startup")
-async def startup_event():
-    print("="*50)
-    print(f"🚀 {settings.PROJECT_NAME} Booting Up...")
-    print(f"👑 Root Creator Locked: {settings.CREATOR.name}")
-    print(f"📧 Authorized Email: {settings.CREATOR.email}")
-    print("🌐 Multi-Agent Core (MoA) Online")
-    print("="*50)
+@app.get("/")
+def health_check():
+    return {"status": "Online", "creator": identity.name, "memory": jarvis_memory.db_status}
+
+# 🔒 [CRITICAL CHANGE]: Added 'Depends(verify_creator)'
+# अब कोई भी बिना '1005@Maani' टोकन के इस API को हिट नहीं कर सकता।
+@app.post("/api/v1/chat", dependencies=[Depends(verify_creator)])
+def handle_chat(request: ChatRequest):
+    try:
+        # 1. Process via MoA Engine
+        result = moa_engine.process_query(request.query, request.workspace_mode)
+        
+        # 2. Save conversation to Infinite Memory
+        jarvis_memory.save_context(request.query, result["response"])
+        
+        return {
+            "reply": result["response"],
+            "is_god_mode": True,
+            "metadata": {"engine": result["provider"]}
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    # This runs the server locally if you run 'python main.py'
     uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=True)
     
