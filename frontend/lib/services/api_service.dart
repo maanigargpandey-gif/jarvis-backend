@@ -2,25 +2,36 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl = "https://your-jarvis-backend-url.com"; // यहाँ अपनी URL डालना
+  // TODO: यहाँ अपना असली Hugging Face / Render URL डालना (जैसे https://maanigarg...hf.space)
+  static const String baseUrl = "https://maanigargpande-jarvis-backend.hf.space/"; 
+  
+  // तुम्हारा मास्टर पासवर्ड जो auth.py से मैच करेगा
+  static const String creatorToken = "1005@Maani";
 
-  static Stream<String> streamAiResponse(String prompt, String apiKey) async* {
-    // यह API बाइंडिंग का मेन फंक्शन है। 
-    // यह अब पूरी तरह से 'Overlay' के साथ सिंक है।
+  static Future<String> sendMessageToJarvis(String query, String workspaceMode) async {
     try {
-      yield "Connecting to Neural Core...";
-      // यहाँ API कॉल होगी (जो भी तुम्हारी API का तरीका है)
-      await Future.delayed(const Duration(seconds: 1));
-      yield "Thinking...";
-      await Future.delayed(const Duration(seconds: 1));
-      yield "Neural Link Established. System is ready.";
-    } catch (e) {
-      yield "Error: ${e.toString()}";
-    }
-  }
+      final response = await http.post(
+        Uri.parse('$baseUrl/chat'),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Creator-Token': creatorToken, // Security Lock
+        },
+        body: jsonEncode({
+          'query': query,
+          'workspace_mode': workspaceMode,
+        }),
+      );
 
-  static Future<void> reportErrorToDashboard(String module, String error) async {
-    // एरर रिपोर्टिंग के लिए
-    print("Reporting $module error: $error");
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['reply'] ?? "No response received.";
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        return "⚠️ Authentication Failed. Creator token is invalid.";
+      } else {
+        return "⚠️ Error: Server responded with status ${response.statusCode}";
+      }
+    } catch (e) {
+      return "⚠️ Connection Error: Is the backend server running? ($e)";
+    }
   }
 }
