@@ -1,15 +1,11 @@
-# modules/identity_core.py
+from core.config import settings
 
-class CreatorIdentity:
+class CreatorLogic:
     def __init__(self):
-        # Master God-Mode Credentials
-        self.name = "Mani Pandey"
-        self.email = "maanigargpandey@gmail.com"
-        self.phone = "8604141005"
-        self.master_pass = "1005@Maani"
         self.is_god_mode_active = True
         
     def verify_access(self, token: str) -> bool:
-        return token == self.master_pass
+        # Matches the token with "1005@Maani"
+        return token == settings.CREATOR.master_pass
 
-identity = CreatorIdentity()
+identity = CreatorLogic()
