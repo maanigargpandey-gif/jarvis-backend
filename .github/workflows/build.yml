@@ -1,27 +1,47 @@
 name: Jarvis OS Build Pipeline
-on: [push]
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # ध्यान दें: अगर तुम्हारा Flutter कोड 'frontend' फोल्डर में नहीं है, 
+    # तो नीचे वाली 2 लाइनें (defaults) हटा देना। 
     defaults:
       run:
         working-directory: frontend
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-      - uses: subosito/flutter-action@v2
+          
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
-      - name: Install Packages
+          channel: 'stable'
+          
+      - name: Install Dependencies
         run: flutter pub get
+        
       - name: Build Release APK
-        run: flutter build apk --release || true
-      - name: Find and Upload APK
+        # यहाँ से '|| true' हटा दिया गया है ताकि असली एरर पकड़ी जा सके
+        run: flutter build apk --release
+        
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: jarvis-apk
-          path: frontend/**/*.apk
+          name: Zarvish-OS-Release-APK
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
           
