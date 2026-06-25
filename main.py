@@ -1,18 +1,16 @@
-# main.py
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional
-
-# Import the missing modules we just created
-from auth import verify_creator
+from core.config import settings
+from api.routes import router as api_router
 from memory import jarvis_memory
-from modules.identity_core import identity
-from services.moa_engine import moa_engine # (यह फाइल पहले से आपके पास है)
 
-app = FastAPI(title="Zarvish OS Backend", version="4.0.0")
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    description="Backend API for Zarvish OS Frontend Binding"
+)
 
-# CORS Setup for Flutter Binding
+# CORS Setup - Very Important for Flutter
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,32 +19,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ChatRequest(BaseModel):
-    query: str
-    workspace_mode: str = "chat"
-
 @app.get("/")
 def health_check():
-    return {"status": "Online", "creator": identity.name, "memory": jarvis_memory.db_status}
+    return {
+        "status": "Online", 
+        "os": settings.PROJECT_NAME, 
+        "creator": settings.CREATOR.name,
+        "memory_status": jarvis_memory.db_status
+    }
 
-# 🔒 [CRITICAL CHANGE]: Added 'Depends(verify_creator)'
-# अब कोई भी बिना '1005@Maani' टोकन के इस API को हिट नहीं कर सकता।
-@app.post("/api/v1/chat", dependencies=[Depends(verify_creator)])
-def handle_chat(request: ChatRequest):
-    try:
-        # 1. Process via MoA Engine
-        result = moa_engine.process_query(request.query, request.workspace_mode)
-        
-        # 2. Save conversation to Infinite Memory
-        jarvis_memory.save_context(request.query, result["response"])
-        
-        return {
-            "reply": result["response"],
-            "is_god_mode": True,
-            "metadata": {"engine": result["provider"]}
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# Connect Routes
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+@app.on_event("startup")
+async def startup_event():
+    print("="*50)
+    print(f"🚀 {settings.PROJECT_NAME} Booting Up...")
+    print(f"👑 Root Creator Locked: {settings.CREATOR.name}")
+    print("🌐 Multi-Agent Core (MoA) Online")
+    print("="*50)
 
 if __name__ == "__main__":
     import uvicorn
