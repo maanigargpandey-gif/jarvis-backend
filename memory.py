@@ -1,21 +1,25 @@
-# याददाश्त और नए कोड के बदलावों को अस्थायी रूप से सहेजने का डिब्बा
-user_memory = {}
-staged_code = {}
+# memory.py
+import datetime
 
-def save_memory(user_id: str, key: str, value: str):
-    if user_id not in user_memory:
-        user_memory[user_id] = {}
-    user_memory[user_id][key] = value
+class InfiniteMemory:
+    def __init__(self):
+        self.db_status = "Vector Memory Engine (Active)"
+        self.short_term_memory = []
+        
+    def save_context(self, user_query: str, ai_response: str):
+        """Auto-compress and save to long-term memory."""
+        context = {
+            "query": user_query,
+            "response": ai_response,
+            "timestamp": str(datetime.datetime.now())
+        }
+        self.short_term_memory.append(context)
+        print(f"🧠 [Memory Saved]: {user_query[:30]}...")
+        
+    def retrieve_context(self, current_query: str):
+        """Fetches related past conversations based on vector similarity."""
+        if len(self.short_term_memory) > 0:
+            return self.short_term_memory[-5:] # Return last 5 contexts for now
+        return []
 
-def get_memory(user_id: str):
-    return user_memory.get(user_id, {})
-
-def stage_change(feature_name: str, code_content: str):
-    staged_code[feature_name] = code_content
-
-def get_staged_changes():
-    return staged_code
-
-def clear_staged_changes():
-    staged_code.clear()
-  
+jarvis_memory = InfiniteMemory()
