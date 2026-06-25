@@ -1,34 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'providers/jarvis_state_provider.dart';
-import 'gateways/auth_gate.dart';
+import 'providers/theme_provider.dart';
+import 'providers/ai_state_provider.dart';
+import 'providers/voice_provider.dart';
+import 'screens/home_screen.dart';
+import 'screens/omni_workspace_screen.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  await Hive.openBox('jarvis_data');
-  
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => JarvisStateProvider()),
-      ],
-      child: const JarvisApp(),
-    ),
-  );
+  runApp(const ZarvishOS());
 }
 
-class JarvisApp extends StatelessWidget {
-  const JarvisApp({super.key});
+class ZarvishOS extends StatelessWidget {
+  const ZarvishOS({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AIStateProvider()),
+        ChangeNotifierProvider(create: (_) => VoiceProvider()),
+      ],
+      child: const ZarvishMaterialApp(),
+    );
+  }
+}
+
+class ZarvishMaterialApp extends StatelessWidget {
+  const ZarvishMaterialApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     return MaterialApp(
+      title: 'Zarvish OS',
       debugShowCheckedModeBanner: false,
-      title: 'Jarvis OS',
-      theme: ThemeData.dark(),
-      home: const AuthGate(), // सीधा AuthGate पर ले जाएगा
+      theme: ThemeProvider.lightTheme,
+      darkTheme: ThemeProvider.darkTheme,
+      themeMode: themeProvider.themeMode,
+      home: const HomeScreen(),
+      routes: {
+        '/omni-workspace': (context) => const OmniWorkspaceScreen(),
+      },
     );
   }
 }
