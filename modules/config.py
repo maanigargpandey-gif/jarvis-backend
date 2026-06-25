@@ -1,22 +1,42 @@
 import os
-from pydantic import BaseModel
+import json
+from dotenv import load_dotenv
 
-class CreatorIdentity(BaseModel):
-    name: str = "Mani Pandey"
-    email: str = "maanigargpandey@gmail.com"
-    phone: str = "86041 41005"
-    master_pass: str = "1005@Maani"
+load_dotenv()
 
-class Settings:
-    PROJECT_NAME: str = "Zarvish OS Backend"
-    VERSION: str = "4.0.0"
-    API_V1_STR: str = "/api/v1"
-    
-    # API Keys (Loaded from environment variables on Hugging Face)
-    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "dummy_gemini_key")
-    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "dummy_deepseek_key")
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "dummy_openai_key")
-    
-    CREATOR = CreatorIdentity()
+class Config:
+    APK_DIR = "frontend/build/app/outputs/flutter-apk/"
 
-settings = Settings()
+    @staticmethod
+    def get_key(provider: str) -> str:
+        try:
+            if os.path.exists("data/keys.json"):
+                with open("data/keys.json", "r") as f:
+                    keys = json.load(f)
+                    if provider in keys and keys[provider]:
+                        return keys[provider]
+        except Exception:
+            pass
+            
+        if provider == "Groq":
+            return os.getenv("Jarvis_Logic", "")
+        if provider == "HF":
+            return os.getenv("HF_KEY", "")
+        return ""
+
+    @staticmethod
+    def save_key(provider: str, api_key: str) -> bool:
+        try:
+            os.makedirs("data", exist_ok=True)
+            keys = {}
+            if os.path.exists("data/keys.json"):
+                with open("data/keys.json", "r") as f:
+                    keys = json.load(f)
+            
+            keys[provider] = api_key
+            with open("data/keys.json", "w") as f:
+                json.dump(keys, f, indent=4)
+            return True
+        except Exception:
+            return False
+            
