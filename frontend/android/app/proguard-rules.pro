@@ -1,4 +1,4 @@
-# ProGuard Rules for Jarvis OS
+# Proguard Rules for Jarvis OS
 # Keeping Flutter code
 -keep class io.flutter.app.** { *; }
 -keep class io.flutter.plugin.** { *; }
@@ -8,7 +8,7 @@
 -keep class * extends io.flutter.app.FlutterApplication { *; }
 -keep class * extends io.flutter.plugin.common.PluginRegistry { *; }
 
-# Keep ProGuard hidden stuff
+# Keep Proguard hidden stuff
 -dontobfuscate
 -keepattributes Signature
 -keepattributes *Annotation*
