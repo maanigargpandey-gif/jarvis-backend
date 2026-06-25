@@ -12,7 +12,7 @@ class Settings:
     VERSION: str = "4.0.0"
     API_V1_STR: str = "/api/v1"
     
-    # API Keys (Loaded from environment variables on Hugging Face)
+    # API Keys (Loaded from environment variables)
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "dummy_gemini_key")
     DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "dummy_deepseek_key")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "dummy_openai_key")
