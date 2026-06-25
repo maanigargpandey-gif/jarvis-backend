@@ -1,5 +1,5 @@
 fastapi
-uvicorn[standard]
+uvicorn
 pydantic
 cryptography
 openpyxl
@@ -7,3 +7,4 @@ requests
 aiohttp
 python-multipart
 python-dotenv
+websockets
