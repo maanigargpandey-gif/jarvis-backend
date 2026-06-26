@@ -30,3 +30,31 @@ class ZarvishTheme {
     ),
   );
   
+  static final ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    primarySwatch: Colors.indigo,
+    scaffoldBackgroundColor: const Color(0xFF0A0E21),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFF7C4DFF),
+      secondary: Color(0xFF00E5FF),
+      surface: Color(0xFF1A1A2E),
+      error: Color(0xFFCF6679),
+    ),
+    textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+    appBarTheme: AppBarTheme(
+      backgroundColor: const Color(0xFF0A0E21).withOpacity(0.8),
+      elevation: 0,
+      iconTheme: const IconThemeData(color: Colors.white),
+      titleTextStyle: GoogleFonts.rajdhani(
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+      ),
+    ),
+    cardTheme: CardTheme(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: const Color(0xFF1A1A2E),
+    ),
+  );
+}
