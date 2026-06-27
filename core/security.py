@@ -1,27 +1,25 @@
-import hashlib
-import hmac
-import time
+from fastapi import Security, HTTPException, status
+from fastapi.security import APIKeyHeader
 from core.config import settings
 
-class SecurityManager:
-    @staticmethod
-    def generate_signature(data: str, timestamp: int) -> str:
-        message = f"{data}:{timestamp}:{settings.SECRET_KEY}"
-        return hmac.new(
-            settings.SECRET_KEY.encode(),
-            message.encode(),
-            hashlib.sha256
-        ).hexdigest()
+# Flutter ऐप हर रिक्वेस्ट के हैडर में "X-Creator-Token" भेजेगा
+api_key_header = APIKeyHeader(name="X-Creator-Token", auto_error=False)
+
+async def verify_creator(creator_token: str = Security(api_key_header)):
+    if not creator_token:
+        print("❌ Auth Failed: No Token Provided")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Creator Token"
+        )
     
-    @staticmethod
-    def validate_signature(data: str, timestamp: int, signature: str) -> bool:
-        expected = SecurityManager.generate_signature(data, timestamp)
-        if abs(time.time() - timestamp) > 300:
-            return False
-        return hmac.compare_digest(expected, signature)
+    # यहाँ हम God Mode Pin से वेरिफाई कर रहे हैं (आप इसे बाद में एन्क्रिप्टेड टोकन से बदल सकते हैं)
+    if creator_token != settings.GOD_MODE_PIN:
+        print("🚫 Unauthorized Access Attempt Blocked!")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access Denied. God-Mode Only."
+        )
     
-    @staticmethod
-    def hash_sensitive_data(data: str) -> str:
-        salt = settings.SECRET_KEY.encode()
-        return hashlib.pbkdf2_hmac('sha256', data.encode(), salt, 100000).hex()
-      
+    return True
+    
