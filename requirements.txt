@@ -1,10 +1,29 @@
+# ---- Core Framework (DeepSeek) ----
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 pydantic==2.5.3
 pydantic-settings==2.1.0
-cryptography==41.0.7
-aiohttp==3.9.1
 python-multipart==0.0.6
-python-dotenv==1.0.0
-pinecone-client==2.2.4
-psutil==5.9.6
+
+# ---- Security & Vault ----
+cryptography==41.0.7
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# ---- AI & Vector DB (Memory) ----
+pinecone-client==3.0.2
+openai==1.10.0
+google-generativeai==0.3.2
+
+# ---- Mani's V8 Engines (From PDF) ----
+# Media Studio & Creative
+replicate==0.22.0
+pillow==10.2.0
+
+# Call Manager & Connectivity
+twilio==8.12.0
+aiohttp==3.9.1
+
+# Document Editor & System
+python-docx==1.1.0
+astor==0.8.1       # For Self-Evolution AST parsing
