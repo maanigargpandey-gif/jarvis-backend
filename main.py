@@ -1,30 +1,29 @@
-import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+
 from core.config import settings
-from api.routes import auth, chat, admin, social, vault, memory
-from services.pinecone_service import PineconeService
+from core.security import verify_creator
+
+# इन फाइलों को हम आगे बनाएंगे (ये आपके पुराने PDF वाले इंजन्स हैं)
+# from services.call_manager import CallManagerService
+# from services.pinecone_service import PineconeMemory
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("=" * 60)
-    print(f"🚀 {settings.PROJECT_NAME} v{settings.VERSION} Booting...")
-    print(f"👑 Root Creator: {settings.CREATOR_NAME}")
-    print("🧠 Pinecone Memory: Initializing...")
-    await PineconeService.initialize()
-    print("✅ All Systems Online")
-    print("=" * 60)
+    print(f"🚀 {settings.PROJECT_NAME} v{settings.VERSION} INITIALIZING...")
+    print("🔒 GOD MODE SECURED FOR: Mani Pandey")
+    
+    # यहाँ आपके बैकग्राउंड टास्क स्टार्ट होंगे (जैसे कॉल्स सुनना और मेमोरी लोड करना)
+    # await PineconeMemory.initialize()
+    # await CallManagerService.start_listening()
+    
     yield
-    await PineconeService.cleanup()
+    print("🛑 ZARVISH SHUTTING DOWN...")
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    description="Enterprise AI Productivity Assistant Backend",
-    lifespan=lifespan
-)
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION, lifespan=lifespan)
 
+# CORS Setup - ताकि Flutter App आसानी से कनेक्ट हो सके
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -33,23 +32,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix=f"{settings.API_V1}/auth", tags=["Auth"])
-app.include_router(chat.router, prefix=f"{settings.API_V1}/chat", tags=["Chat"])
-app.include_router(admin.router, prefix=f"{settings.API_V1}/admin", tags=["Admin"])
-app.include_router(social.router, prefix=f"{settings.API_V1}/social", tags=["Social"])
-app.include_router(vault.router, prefix=f"{settings.API_V1}/vault", tags=["Vault"])
-app.include_router(memory.router, prefix=f"{settings.API_V1}/memory", tags=["Memory"])
-
 @app.get("/")
-async def health_check():
+async def system_status():
     return {
         "status": "Online",
-        "os": settings.PROJECT_NAME,
-        "version": settings.VERSION,
-        "creator": settings.CREATOR_NAME,
-        "memory_status": await PineconeService.get_status()
+        "system": "Zarvish 4.0",
+        "creator": "Mani Pandey",
+        "message": "Awaiting Command."
     }
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=True)
-  
+# गॉड-मोड टेस्ट एंडपॉइंट
+@app.get("/api/god-mode", dependencies=[Depends(verify_creator)])
+async def god_mode_test():
+    return {"message": "Welcome back, Creator. Root access granted."}
+
+# आगे चलकर हम यहाँ सारे राउट्स (Chat, Media, Vault) को लिंक करेंगे
+# app.include_router(chat.router, prefix="/api/chat", dependencies=[Depends(verify_creator)])
+# app.include_router(media.router, prefix="/api/media", dependencies=[Depends(verify_creator)])
