@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// आगे हम ये प्रोवाइडर्स और स्क्रीन्स बनाएंगे (अभी के लिए इन्हें ऐसे ही रहने दें)
-// import 'providers/auth_provider.dart';
-// import 'providers/workspace_provider.dart';
-// import 'screens/auth/login_screen.dart';
-// import 'screens/workspace_split_view.dart';
+// --- Theme & Providers ---
+import 'config/theme.dart';
+import 'providers/workspace_provider.dart';
+
+// --- Screens ---
+import 'screens/auth/login_screen.dart';
 
 void main() async {
+  // Flutter बाइंडिंग इनीशियलाइज़ करना (लोकल स्टोरेज/हार्डवेयर के लिए)
   WidgetsFlutterBinding.ensureInitialized();
-  // यहाँ हम लोकल स्टोरेज और कैमरा इनीशियलाइज़ करेंगे
+  
+  // यहाँ पर जार्विस का बेस स्टार्ट होता है
   runApp(const ZarvishApp());
 }
 
@@ -18,49 +21,21 @@ class ZarvishApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MultiProvider आपके "Omni-UI" को पावर देगा
+    // MultiProvider आपके "Omni-UI" (बिना रीस्टार्ट किए UI बदलना) को पावर देता है
     return MultiProvider(
       providers: [
-        // ChangeNotifierProvider(create: (_) => AuthProvider()),
-        // ChangeNotifierProvider(create: (_) => WorkspaceProvider()),
+        ChangeNotifierProvider(create: (_) => WorkspaceProvider()),
+        // अगर भविष्य में ThemeProvider या AuthProvider जोड़ना हो, तो यहाँ आएगा
       ],
       child: MaterialApp(
         title: 'Zarvish God-Mode',
-        debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false, // डिबग बैनर हटा दिया
         
-        // Cyberpunk Dark Theme (Master Look)
-        theme: ThemeData.dark().copyWith(
-          scaffoldBackgroundColor: const Color(0xFF0A0A0A), // Deep Dark Black
-          primaryColor: const Color(0xFF00FF41), // Matrix Hacker Green
-          colorScheme: const ColorScheme.dark(
-            primary: Color(0xFF00FF41),
-            secondary: Color(0xFF8A2BE2), // Deep Violet for AI accents
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF121212),
-            elevation: 0,
-          ),
-        ),
+        // 🎨 मास्टर थीम (Dark Ash Grey, Emerald Green, Electric Blue)
+        theme: ZarvishTheme.cyberpunkDark,
         
-        // AuthGate तय करेगा कि लॉगिन स्क्रीन दिखानी है या वर्कस्पेस
-        home: const PlaceholderScreen(), // इसे हम AuthGate() से बदलेंगे 
-      ),
-    );
-  }
-}
-
-// जब तक हम असली स्क्रीन्स नहीं बनाते, तब तक ऐप क्रैश न हो इसलिए ये डमी स्क्रीन है
-class PlaceholderScreen extends StatelessWidget {
-  const PlaceholderScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          "ZARVISH 4.0 INITIALIZING...\nWAITING FOR NEURAL LINK.",
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF00FF41), letterSpacing: 2.0),
-        ),
+        // 🛡️ ऑथेंटिकेशन गेट (सबसे पहले यह चेक करेगा कि 'मानी भाई' हैं या नहीं)
+        home: const LoginScreen(), 
       ),
     );
   }
