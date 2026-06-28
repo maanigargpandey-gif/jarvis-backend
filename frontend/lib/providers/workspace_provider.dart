@@ -1,30 +1,19 @@
 import 'package:flutter/material.dart';
 
-enum WorkspaceMode { chat, document, code, creative, social }
+// ये वो सारे मोड्स हैं जो आपने PDF में डिफाइन किए थे
+enum WorkspaceMode { chat, document, creative, code, vault }
 
 class WorkspaceProvider extends ChangeNotifier {
+  // Default mode 'chat' रहेगा
   WorkspaceMode _currentMode = WorkspaceMode.chat;
-  bool _isSplitView = false;
-  double _splitRatio = 0.8; // 80/20 split
 
   WorkspaceMode get currentMode => _currentMode;
-  bool get isSplitView => _isSplitView;
-  double get splitRatio => _splitRatio;
 
-  void setMode(WorkspaceMode mode) {
-    _currentMode = mode;
-    _isSplitView = mode != WorkspaceMode.chat;
-    notifyListeners();
-  }
-
-  void toggleSplitView() {
-    _isSplitView = !_isSplitView;
-    notifyListeners();
-  }
-
-  void setSplitRatio(double ratio) {
-    _splitRatio = ratio.clamp(0.2, 0.9);
-    notifyListeners();
+  // Omni-UI Switcher: जब आप कमांड देंगे, ये फंक्शन कॉल होगा
+  void changeMode(WorkspaceMode newMode) {
+    if (_currentMode != newMode) {
+      _currentMode = newMode;
+      notifyListeners(); // पलक झपकते ही UI बदल जाएगा
+    }
   }
 }
-
