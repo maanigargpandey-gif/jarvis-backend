@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/workspace_provider.dart';
+import '../widgets/chat_dock.dart';
 
 class WorkspaceSplitView extends StatelessWidget {
   const WorkspaceSplitView({super.key});
@@ -36,20 +37,10 @@ class WorkspaceSplitView extends StatelessWidget {
               ),
             ),
 
-            // BOTTOM 20% - AI Assistant Chat Dock
-            Expanded(
+            // BOTTOM 20% - AI Assistant Chat Dock (यहाँ चैट डॉक जोड़ दिया गया है)
+            const Expanded(
               flex: 2,
-              child: Container(
-                color: const Color(0xFF1E1E24), // Frosted Glass / Ash grey panel
-                padding: const EdgeInsets.all(8.0),
-                child: const Center(
-                  child: Text(
-                    "AI Assistant Chat Interface\n(Mic & '+' Attachment Menu will be here)",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white54),
-                  ),
-                ),
-              ),
+              child: ChatDock(), 
             ),
           ],
         ),
@@ -57,18 +48,30 @@ class WorkspaceSplitView extends StatelessWidget {
     );
   }
 
-  // Omni-UI Logic: 80% वाली स्क्रीन में क्या दिखेगा, ये यहाँ से तय होगा
+  // Omni-UI Logic: 80% वाली स्क्रीन में क्या दिखेगा
   Widget _buildActiveWorkspace(WorkspaceMode mode) {
     switch (mode) {
       case WorkspaceMode.document:
-        return const Center(child: Text("📝 DOCUMENT FORGE MODE ACTIVE", style: TextStyle(fontSize: 20)));
+        return const Center(
+          child: Text("📝 DOCUMENT FORGE ACTIVE", style: TextStyle(fontSize: 20, color: Colors.white70)),
+        );
       case WorkspaceMode.creative:
-        return const Center(child: Text("🎨 MEDIA STUDIO 8K ACTIVE", style: TextStyle(fontSize: 20)));
+        return const Center(
+          child: Text("🎨 MEDIA STUDIO 8K ACTIVE", style: TextStyle(fontSize: 20, color: Colors.white70)),
+        );
       case WorkspaceMode.vault:
-        return const Center(child: Text("🔒 NEXUS VAULT UNLOCKED", style: TextStyle(fontSize: 20)));
+        return const Center(
+          child: Text("🔒 NEXUS VAULT UNLOCKED", style: TextStyle(fontSize: 20, color: Colors.white70)),
+        );
+      case WorkspaceMode.code:
+        return const Center(
+          child: Text("⚙️ SELF-EVOLUTION ENGINE", style: TextStyle(fontSize: 20, color: Colors.white70)),
+        );
       case WorkspaceMode.chat:
       default:
-        return const Center(child: Text("🧠 NEURAL CORE STANDBY", style: TextStyle(fontSize: 20)));
+        return const Center(
+          child: Text("🧠 NEURAL CORE STANDBY", style: TextStyle(fontSize: 20, color: Color(0xFF00FF41))),
+        );
     }
   }
 }
