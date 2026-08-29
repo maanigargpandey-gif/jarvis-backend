@@ -11,39 +11,48 @@ class SidebarMenu extends StatelessWidget {
     final workspaceProvider = Provider.of<WorkspaceProvider>(context, listen: false);
 
     return Drawer(
-      backgroundColor: const Color(0xFF121215), // Dark Ash Grey Theme
+      backgroundColor: const Color(0xFF121215), // DeepSeek's Dark Ash Grey Theme
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // 👑 Creator Header
-          DrawerHeader(
+          // 👑 DeepSeek's Original Profile / Login Header (Merged with God-Mode)
+          UserAccountsDrawerHeader(
             decoration: const BoxDecoration(
               color: Color(0xFF0A0A0C), // Deep Black
               border: Border(bottom: BorderSide(color: Color(0xFF00FF41), width: 2)), // Hacker Green Border
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF1E1E24),
-                    border: Border.all(color: const Color(0xFF00E5FF), width: 1.5),
-                  ),
-                  child: const Icon(Icons.security, color: Color(0xFF00E5FF), size: 30),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "MANI PANDEY", 
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),
-                ),
-                const Text(
-                  "GOD-MODE ACTIVE", 
-                  style: TextStyle(color: Color(0xFF00FF41), fontSize: 12),
-                ),
-              ],
+            currentAccountPicture: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF00E5FF), width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00E5FF).withOpacity(0.3),
+                    blurRadius: 10,
+                  )
+                ],
+              ),
+              child: const CircleAvatar(
+                backgroundColor: Color(0xFF1E1E24),
+                // यहाँ आप अपनी असली फोटो लगा सकते हैं: backgroundImage: NetworkImage('YOUR_PHOTO_URL_HERE'),
+                child: Icon(Icons.person, color: Color(0xFF00E5FF), size: 40), 
+              ),
+            ),
+            accountName: const Text(
+              "MANI PANDEY",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                fontSize: 18,
+              ),
+            ),
+            accountEmail: const Text(
+              "maanigargpandey@gmail.com\nGOD-MODE ACTIVE",
+              style: TextStyle(
+                color: Color(0xFF00FF41), // Hacker Green
+                fontSize: 12,
+              ),
             ),
           ),
 
@@ -87,6 +96,14 @@ class SidebarMenu extends StatelessWidget {
             Navigator.pop(context);
           }),
           _buildDrawerItem(context, Icons.terminal, "n8n Workflows", () {}),
+          
+          const Divider(color: Colors.white10),
+          
+          // 🚪 5. DEEPSEEK SESSION TERMINATE (LOGOUT)
+          _buildDrawerItem(context, Icons.logout, "Terminate Session", () {
+            // Logout logic will go here
+            Navigator.pop(context);
+          }, color: Colors.redAccent),
         ],
       ),
     );
@@ -98,15 +115,20 @@ class SidebarMenu extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
       child: Text(
         title,
-        style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+        style: const TextStyle(
+          color: Colors.white38,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.5,
+        ),
       ),
     );
   }
 
-  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
+  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, VoidCallback onTap, {Color? color}) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF00E5FF)), // Electric Blue Icon
-      title: Text(title, style: const TextStyle(color: Colors.white70)),
+      leading: Icon(icon, color: color ?? const Color(0xFF00E5FF)), // Electric Blue Icon or Red
+      title: Text(title, style: TextStyle(color: color ?? Colors.white70)),
       onTap: onTap,
       hoverColor: const Color(0xFF00FF41).withOpacity(0.1),
     );
